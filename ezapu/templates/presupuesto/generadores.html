@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Generadores · {{ concepto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Volúmenes y generadores · {{ concepto.clave }}</h1>
+  <p class="ayuda">
+    {{ concepto.descripcion }} · {{ concepto.proyecto_nombre }}
+    · Volumen en presupuesto: <b>{{ concepto.cantidad | qty }} {{ concepto.unidad or '' }}</b>
+  </p>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>#</th><th>Concepto de medición</th><th class="der">Veces</th><th class="der">Largo</th>
+      <th class="der">Ancho</th><th class="der">Alto</th><th class="der">Total</th><th class="acciones"></th></tr></thead>
+    <tbody>
+      {% for g in generadores %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td>{{ g.descripcion }}</td>
+          <td class="der">{{ g.veces | qty }}</td>
+          <td class="der">{{ g.largo | qty }}</td>
+          <td class="der">{{ g.ancho | qty }}</td>
+          <td class="der">{{ g.alto | qty }}</td>
+          <td class="der">{{ g.total | qty }}</td>
+          <td class="acciones">
+            <form class="en-linea" method="post" data-confirmar="¿Eliminar el generador?"
+                  action="{{ url_for('presupuesto.generador_eliminar', generador_id=g.id) }}">
+              <button class="boton boton--chico boton--peligro" type="submit">Quitar</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="vacio">Sin generadores capturados.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><th colspan="6">Suma de generadores</th><th class="der">{{ suma | qty }}</th><th></th></tr></tfoot>
+  </table>
+</div>
+
+<div class="tarjeta">
+  <h2>Agregar renglón de medición</h2>
+  <form method="post" action="{{ url_for('presupuesto.generador_nuevo', concepto_id=concepto.id) }}" class="formulario">
+    <div class="formulario__rejilla">
+      <label class="campo campo--ancho"><span class="campo__etiqueta">Concepto de medición</span>
+        <input type="text" name="descripcion" placeholder="Ej. Eje A-A, contratrabe CT-1"></label>
+      <label class="campo"><span class="campo__etiqueta">Veces</span><input type="number" step="any" name="veces" value="1"></label>
+      <label class="campo"><span class="campo__etiqueta">Largo</span><input type="number" step="any" name="largo" value="0"></label>
+      <label class="campo"><span class="campo__etiqueta">Ancho</span><input type="number" step="any" name="ancho" value="0"></label>
+      <label class="campo"><span class="campo__etiqueta">Alto / espesor</span><input type="number" step="any" name="alto" value="1"></label>
+      <label class="campo"><span class="campo__etiqueta">Aplicar al volumen</span>
+        <input type="checkbox" name="aplicar" value="1" checked></label>
+    </div>
+    <div class="formulario__acciones">
+      <button class="boton" type="submit">Agregar</button>
+      <a class="boton boton--claro" href="{{ url_for('presupuesto.hoja_presupuesto', proyecto_id=concepto.pid) }}">Volver al presupuesto</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

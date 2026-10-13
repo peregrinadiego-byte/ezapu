@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block titulo %}{{ spec.titulo }}{% endblock %}
+{% block contenido %}
+{% set filtros = filtros or {} %}
+<div class="encabezado">
+  <h1>{{ spec.titulo }}</h1>
+  {% if spec.get('descripcion') %}<p class="ayuda">{{ spec.get('descripcion') }}</p>{% endif %}
+</div>
+
+{% set cadena_filtros = [] %}
+{% for clave, valor in filtros.items() %}
+  {% set _ = cadena_filtros.append(clave ~ '=' ~ valor) %}
+{% endfor %}
+{% set sufijo = '?' ~ cadena_filtros | join('&') if cadena_filtros else '' %}
+
+<div class="barra-herramientas">
+  <form class="buscador" method="get">
+    {% for clave, valor in filtros.items() %}
+      <input type="hidden" name="{{ clave }}" value="{{ valor }}">
+    {% endfor %}
+    <input type="search" name="q" value="{{ buscar }}" placeholder="Buscar…">
+    <button class="boton boton--claro" type="submit">Buscar</button>
+    {% if buscar or filtros %}<a class="enlace-simple" href="{{ url_for('catalogos.lista', tabla=spec.tabla) }}">Limpiar</a>{% endif %}
+  </form>
+  <div class="barra-herramientas__acciones">
+    <span class="contador">{{ filas | length }} renglón(es)</span>
+    <a class="boton" href="{{ url_for('catalogos.nuevo', tabla=spec.tabla) }}{{ sufijo }}">Nuevo</a>
+  </div>
+</div>
+
+{% if spec.tabla == 'recurso' %}
+  <div class="fichas">
+    <a class="ficha {{ 'ficha--activa' if not filtros.get('tipo') }}" href="{{ url_for('catalogos.lista', tabla='recurso') }}">Todos</a>
+    {% for clave, nombre in TIPOS_RECURSO.items() %}
+      <a class="ficha {{ 'ficha--activa' if filtros.get('tipo') == clave }}"
+         href="{{ url_for('catalogos.lista', tabla='recurso', tipo=clave) }}">{{ nombre }}</a>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead>
+      <tr>
+        {% for columna in spec.columnas %}
+          <th class="{{ 'der' if columna.get('alinear') == 'der' }}">{{ columna.etiqueta }}</th>
+        {% endfor %}
+        <th class="acciones">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fila in filas %}
+        <tr>
+          {% for columna in spec.columnas %}
+            {% set clave = columna.clave %}
+            {% set tipo = columna.get('tipo', 'text') %}
+            <td class="{{ 'der' if columna.get('alinear') == 'der' }}">
+              {% if tipo == 'ref' %}{{ fila['_' ~ clave] or '—' }}
+              {% elif tipo == 'badge' %}<span class="etiqueta">{{ fila['_' ~ clave] or '—' }}</span>
+              {% elif tipo == 'money' %}{{ fila[clave] | money }}
+              {% elif tipo == 'qty' %}{{ fila[clave] | qty }}
+              {% elif tipo == 'num' %}{{ fila[clave] | num }}
+              {% elif tipo == 'date' %}{{ fila[clave] | fecha }}
+              {% elif tipo == 'calc' %}{{ fila[clave] | money if columna.get('formato') == 'money' else fila[clave] }}
+              {% else %}{{ fila[clave] if fila[clave] is not none else '—' }}{% endif %}
+            </td>
+          {% endfor %}
+          <td class="acciones">
+            {% if spec.tabla == 'matriz' %}
+              <a class="boton boton--chico" href="{{ url_for('matrices.editor', matriz_id=fila.id) }}">Análisis</a>
+            {% elif spec.tabla == 'proyecto' %}
+              <a class="boton boton--chico" href="{{ url_for('presupuesto.hoja_presupuesto', proyecto_id=fila.id) }}">Presupuesto</a>
+            {% elif spec.tabla == 'concepto' %}
+              <a class="boton boton--chico boton--claro" href="{{ url_for('presupuesto.concepto_desglose', concepto_id=fila.id) }}">Desglose</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('presupuesto.concepto_generadores', concepto_id=fila.id) }}">Volúmenes</a>
+            {% elif spec.tabla == 'almacen' %}
+              <a class="boton boton--chico boton--claro" href="{{ url_for('control.bodega', almacen_id=fila.id) }}">Estado</a>
+            {% endif %}
+            <a class="boton boton--chico boton--claro" href="{{ url_for('catalogos.editar', tabla=spec.tabla, row_id=fila.id) }}">Editar</a>
+            <form class="en-linea" method="post" action="{{ url_for('catalogos.eliminar', tabla=spec.tabla, row_id=fila.id) }}"
+                  data-confirmar="¿Eliminar este renglón?">
+              <button class="boton boton--chico boton--peligro" type="submit">Borrar</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="{{ spec.columnas | length + 1 }}" class="vacio">Sin resultados.</td></tr>
+      {% endfor %}
+    </tbody>
+    {% if totales %}
+      <tfoot>
+        <tr>
+          {% for columna in spec.columnas %}
+            <th class="{{ 'der' if columna.get('alinear') == 'der' }}">
+              {% if columna.clave in totales %}Total: {{ totales[columna.clave] | money }}
+              {% elif loop.first %}Totales{% endif %}
+            </th>
+          {% endfor %}
+          <th></th>
+        </tr>
+      </tfoot>
+    {% endif %}
+  </table>
+</div>
+{% endblock %}

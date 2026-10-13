@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block titulo %}Estimaciones · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Estimaciones · {{ proyecto.clave }}</h1>
+  <p class="ayuda">{{ proyecto.nombre }} · Presupuesto sin IVA {{ resumen_presupuesto | money }}
+    · IVA {{ proyecto.pct_iva | num }} % · Anticipo {{ proyecto.anticipo_pct | num }} %
+    · Retención {{ proyecto.retencion_pct | num }} %</p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ cuenta.total_estimado | money }}</span><span class="kpi__nombre">Subtotal estimado</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ cuenta.total_pagado | money }}</span><span class="kpi__nombre">Pagado</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ cuenta.total_pendiente | money }}</span><span class="kpi__nombre">Pendiente de pago</span></div>
+</div>
+
+<div class="tarjeta">
+  <h2>Estimaciones registradas</h2>
+  <table class="tabla">
+    <thead><tr><th>Número</th><th>Tipo</th><th>Periodo</th><th>Estatus</th>
+      <th class="der">Subtotal</th><th class="der">IVA</th><th class="der">Amortización</th>
+      <th class="der">Retención</th><th class="der">Total</th><th class="der">Pagado</th><th class="acciones"></th></tr></thead>
+    <tbody>
+      {% for e in cuenta.estimaciones %}
+        <tr>
+          <td><b>{{ e.numero }}</b></td>
+          <td><span class="etiqueta">{{ e.tipo }}</span></td>
+          <td>{{ e.periodo_inicio | fecha }} – {{ e.periodo_fin | fecha }}</td>
+          <td><span class="etiqueta">{{ e.estatus }}</span></td>
+          <td class="der">{{ e.subtotal | money }}</td>
+          <td class="der">{{ e.iva | money }}</td>
+          <td class="der">{{ e.amortizacion | money }}</td>
+          <td class="der">{{ e.retencion | money }}</td>
+          <td class="der"><b>{{ e.total | money }}</b></td>
+          <td class="der">{{ e.pagado | money }}</td>
+          <td class="acciones">
+            <a class="boton boton--chico" href="{{ url_for('control.estimacion', estimacion_id=e.id) }}">Capturar</a>
+            <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.estimacion', estimacion_id=e.id) }}">Imprimir</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="11" class="vacio">Todavía no hay estimaciones.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="tarjeta">
+  <h2>Nueva estimación</h2>
+  <form method="post" action="{{ url_for('control.estimacion_nueva', proyecto_id=proyecto.id) }}" class="formulario">
+    <div class="formulario__rejilla">
+      <label class="campo"><span class="campo__etiqueta">Número</span><input type="text" name="numero" placeholder="EST-03"></label>
+      <label class="campo"><span class="campo__etiqueta">Tipo</span>
+        <select name="tipo">
+          <option value="cobrar">Por cobrar</option>
+          <option value="pagar">Por pagar</option>
+          <option value="proforma">Proforma</option>
+        </select></label>
+      <label class="campo"><span class="campo__etiqueta">Inicio del periodo</span><input type="date" name="periodo_inicio"></label>
+      <label class="campo"><span class="campo__etiqueta">Fin del periodo</span><input type="date" name="periodo_fin"></label>
+      <label class="campo"><span class="campo__etiqueta">Fecha</span><input type="date" name="fecha"></label>
+      <label class="campo"><span class="campo__etiqueta">Contrato (opcional)</span>
+        <select name="contrato_id"><option value="">—</option></select></label>
+    </div>
+    <div class="formulario__acciones">
+      <button class="boton" type="submit">Crear estimación</button>
+      <a class="boton boton--claro" href="{{ url_for('control.estimaciones_indice') }}">Volver</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

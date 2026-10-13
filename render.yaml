@@ -1,0 +1,25 @@
+# Despliegue en Render (https://render.com) con un solo clic:
+#   New + → Blueprint → conecta el repositorio y Render lee este archivo.
+services:
+  - type: web
+    name: ezapu
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --threads 4
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: EZAPU_DB
+        value: /opt/render/project/src/datos/ezapu.db
+      # El plan gratuito no admite discos persistentes: en cada despliegue se
+      # vuelve a crear y sembrar la base. Para conservar los datos, agrega un
+      # disco y descomenta:
+      #
+      # disks:
+      #   - name: datos
+      #     mountPath: /opt/render/project/src/datos
+      #     sizeGB: 1

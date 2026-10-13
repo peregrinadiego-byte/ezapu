@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titulo %}Programa de suministros · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Programa de suministros · {{ proyecto.clave }}</h1>
+  <p class="ayuda">Los insumos de cada partida se reparten entre sus tareas según su peso relativo,
+  con las fechas del programa de obra. Importe total {{ total | money }}.</p>
+</div>
+
+<div class="barra-herramientas">
+  <div class="barra-herramientas__acciones">
+    <a class="boton" href="{{ url_for('presupuesto.suministros_csv', proyecto_id=proyecto.id) }}">Excel/CSV</a>
+    <a class="boton boton--claro" href="{{ url_for('planeacion.programa', proyecto_id=proyecto.id) }}">Programa de obra</a>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Tarea</th><th>Periodo</th><th>Clave</th><th>Descripción</th><th>Unidad</th>
+      <th class="der">Cantidad</th><th class="der">Importe</th></tr></thead>
+    <tbody>
+      {% for f in filas %}
+        <tr>
+          <td>{{ f.tarea }}</td>
+          <td>{{ f.inicio | fecha }} – {{ f.fin | fecha }}</td>
+          <td>{{ f.clave }}</td>
+          <td>{{ f.descripcion }}</td>
+          <td>{{ f.unidad or '—' }}</td>
+          <td class="der">{{ f.cantidad | qty }}</td>
+          <td class="der">{{ f.importe | money }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="vacio">Sin datos: captura tareas y conceptos con matriz.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><th colspan="6">Total</th><th class="der">{{ total | money }}</th></tr></tfoot>
+  </table>
+</div>
+{% endblock %}

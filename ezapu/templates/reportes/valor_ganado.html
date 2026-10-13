@@ -1,0 +1,22 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">Valor ganado · {{ proyecto.clave }} · {{ proyecto.nombre }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla impreso__tabla--angosta">
+  <tbody>
+    <tr><td>Presupuesto (BAC)</td><td class="der">{{ kpi.bac | money }}</td></tr>
+    <tr><td>Valor planeado (PV)</td><td class="der">{{ kpi.pv | money }}</td></tr>
+    <tr><td>Valor ganado (EV)</td><td class="der">{{ kpi.ev | money }}</td></tr>
+    <tr><td>Costo real (AC)</td><td class="der">{{ kpi.ac | money }}</td></tr>
+    <tr><td>Variación de plazo (SV)</td><td class="der">{{ kpi.sv | money }}</td></tr>
+    <tr><td>Variación de costo (CV)</td><td class="der">{{ kpi.cv | money }}</td></tr>
+    <tr><td>Índice de plazo (SPI)</td><td class="der">{{ kpi.spi }}</td></tr>
+    <tr><td>Índice de costo (CPI)</td><td class="der">{{ kpi.cpi }}</td></tr>
+    <tr><td>Estimación a la conclusión (EAC)</td><td class="der">{{ kpi.eac | money }}</td></tr>
+    <tr><td>Variación final (VAC)</td><td class="der">{{ kpi.vac | money }}</td></tr>
+    <tr><td>Avance físico</td><td class="der">{{ kpi.avance_fisico }} %</td></tr>
+    <tr><td>Avance planeado</td><td class="der">{{ kpi.avance_planeado }} %</td></tr>
+  </tbody>
+</table>
+{% endblock %}

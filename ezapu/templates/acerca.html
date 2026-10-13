@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Acerca de{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Acerca de EZAPU</h1>
+  <p class="ayuda">Herramienta web libre (Python + Flask + SQLite + HTML/CSS) que reproduce el flujo
+  de trabajo del sistema OPUS: M1 propuestas y presupuestos, M2 control de obra.</p>
+</div>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Alcance funcional</h2>
+    <ul class="lista">
+      <li>Catálogos de insumos: materiales, mano de obra, equipo, herramienta, auxiliares, subcontratos y fletes.</li>
+      <li>Costos básicos: salario real de mano de obra y costo horario de equipo.</li>
+      <li>Matrices de costo unitario con submatrices anidadas.</li>
+      <li>Presupuesto: partidas, conceptos, volúmenes y números generadores.</li>
+      <li>Análisis del precio: indirectos, utilidad, financiamiento y cargos adicionales.</li>
+      <li>Explosión de insumos y programa de suministros.</li>
+      <li>M2: estructura de trabajos, Gantt, contratos, estimaciones, pagos, consumos, bodega, valor ganado.</li>
+      <li>Reportes imprimibles y exportación a Excel/CSV.</li>
+    </ul>
+  </div>
+  <div class="tarjeta">
+    <h2>Entorno</h2>
+    <dl class="mini mini--ancho">
+      <div><dt>Python</dt><dd>Flask 3 + SQLite3 (sin dependencias extra)</dd></div>
+      <div><dt>SQLite</dt><dd>{{ versiones.sqlite }}</dd></div>
+      <div><dt>Tablas</dt><dd>{{ versiones.tablas | length }}</dd></div>
+    </dl>
+    <p class="ayuda">Base de datos embebida: el proyecto completo vive en un archivo <code>.db</code>,
+    fácil de versionar, respaldar o mover.</p>
+  </div>
+</div>
+{% endblock %}

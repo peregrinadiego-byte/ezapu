@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block titulo %}Bodega · {{ almacen.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Bodega {{ almacen.clave }} · {{ almacen.nombre }}</h1>
+  <p class="ayuda">{{ almacen.proyecto_nombre or 'Sin proyecto' }} · {{ almacen.ubicacion or '' }}
+    · Responsable: {{ almacen.responsable or '—' }}</p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ inventario | length }}</span><span class="kpi__nombre">Insumos con existencia</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ valor | money }}</span><span class="kpi__nombre">Valor del inventario</span></div>
+</div>
+
+<div class="tarjeta">
+  <h2>Existencias</h2>
+  <table class="tabla">
+    <thead><tr><th>Clave</th><th>Descripción</th><th>Tipo</th><th>Unidad</th>
+      <th class="der">Existencia</th><th class="der">Costo promedio</th>
+      <th class="der">Costo de reposición</th><th class="der">Importe</th><th class="acciones"></th></tr></thead>
+    <tbody>
+      {% for i in inventario %}
+        <tr>
+          <td>{{ i.clave }}</td>
+          <td>{{ i.descripcion }}</td>
+          <td><span class="etiqueta">{{ TIPOS_RECURSO.get(i.tipo, i.tipo) }}</span></td>
+          <td>{{ i.unidad or '—' }}</td>
+          <td class="der">{{ i.cantidad | qty }}</td>
+          <td class="der">{{ i.costo_promedio | money }}</td>
+          <td class="der">{{ i.costo_reposicion | money }}</td>
+          <td class="der">{{ i.importe | money }}</td>
+          <td class="acciones">
+            <a class="boton boton--chico boton--claro"
+               href="{{ url_for('control.kardex_insumo', almacen_id=almacen.id, recurso_id=i.recurso_id) }}">Kardex</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" class="vacio">Almacén sin movimientos.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><th colspan="7">Total del inventario</th><th class="der">{{ valor | money }}</th><th></th></tr></tfoot>
+  </table>
+</div>
+
+<div class="tarjeta">
+  <h2>Últimos movimientos</h2>
+  <table class="tabla tabla--compacta">
+    <thead><tr><th>Fecha</th><th>Tipo</th><th>Insumo</th><th class="der">Cantidad</th>
+      <th class="der">Costo unitario</th><th>Documento</th><th>Proveedor</th></tr></thead>
+    <tbody>
+      {% for m in movimientos %}
+        <tr>
+          <td>{{ m.fecha | fecha }}</td>
+          <td><span class="etiqueta {{ 'etiqueta--ok' if m.tipo == 'entrada' }}">{{ m.tipo }}</span></td>
+          <td>{{ m.insumo }} · {{ m.descripcion }}</td>
+          <td class="der">{{ m.cantidad | qty }}</td>
+          <td class="der">{{ m.costo_unitario | money }}</td>
+          <td>{{ m.documento or '—' }}</td>
+          <td>{{ m.tercero or '—' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="vacio">Sin movimientos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

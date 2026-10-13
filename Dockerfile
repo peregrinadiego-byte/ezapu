@@ -11,5 +11,5 @@ COPY . .
 VOLUME ["/datos"]
 EXPOSE 5000
 
-# Crea la base con datos de ejemplo si no existe y arranca el servidor.
-CMD ["sh", "-c", "python -c \"from ezapu import db; import os; p=os.environ['EZAPU_DB']; db.init_db(p, seed=True)\" && python run.py"]
+# Crea la base con datos de ejemplo si no existe y arranca con gunicorn.
+CMD ["sh", "-c", "gunicorn wsgi:app --bind 0.0.0.0:${PORT} --workers 2 --threads 4"]

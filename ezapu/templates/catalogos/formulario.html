@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Nuevo' if nuevo else 'Editar' }} · {{ spec.singular }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>{{ 'Nuevo' if nuevo else 'Editar' }} {{ spec.singular | lower }}</h1>
+  <p class="ayuda"><a class="enlace-simple" href="{{ url_for('catalogos.lista', tabla=spec.tabla) }}">← Volver a {{ spec.titulo }}</a></p>
+</div>
+
+<form class="tarjeta formulario" method="post">
+  {% if volver %}<input type="hidden" name="_volver" value="{{ volver }}">{% endif %}
+  <div class="formulario__rejilla">
+    {% for campo in campos %}
+      {% set valor = valores.get(campo.clave) %}
+      <label class="campo campo--{{ campo.tipo }} {{ 'campo--ancho' if campo.tipo == 'textarea' }}">
+        <span class="campo__etiqueta">
+          {{ campo.etiqueta }}{% if campo.get('requerido') %} <b class="req">*</b>{% endif %}
+        </span>
+        {% if campo.tipo == 'select' %}
+          <select name="{{ campo.clave }}">
+            <option value="">— sin asignar —</option>
+            {% for opcion_valor, opcion_texto in campo.get('opciones') or [] %}
+              <option value="{{ opcion_valor }}" {{ 'selected' if valor is not none and valor | string == opcion_valor | string }}>{{ opcion_texto }}</option>
+            {% endfor %}
+          </select>
+        {% elif campo.tipo == 'textarea' %}
+          <textarea name="{{ campo.clave }}" rows="3">{{ valor if valor is not none else '' }}</textarea>
+        {% elif campo.tipo == 'checkbox' %}
+          <input type="checkbox" name="{{ campo.clave }}" value="1" {{ 'checked' if valor in (1, '1', True) }}>
+        {% elif campo.tipo == 'date' %}
+          <input type="date" name="{{ campo.clave }}" value="{{ (valor | string)[:10] if valor else '' }}">
+        {% elif campo.tipo in ('number', 'money', 'qty') %}
+          <input type="number" step="any" name="{{ campo.clave }}" value="{{ valor if valor is not none else '' }}">
+        {% else %}
+          <input type="text" name="{{ campo.clave }}" value="{{ valor if valor is not none else '' }}">
+        {% endif %}
+        {% if campo.get('ayuda') %}<span class="campo__ayuda">{{ campo.get('ayuda') }}</span>{% endif %}
+      </label>
+    {% endfor %}
+  </div>
+  <div class="formulario__acciones">
+    <button class="boton" type="submit">Guardar</button>
+    <a class="boton boton--claro" href="{{ url_for('catalogos.lista', tabla=spec.tabla) }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

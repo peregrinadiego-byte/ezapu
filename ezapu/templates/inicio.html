@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Tablero de obra</h1>
+  {% if empresa %}
+    <p class="ayuda">{{ empresa.nombre }} · RFC {{ empresa.rfc or '—' }} · moneda {{ empresa.moneda }}</p>
+  {% endif %}
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ conteos.insumos }}</span><span class="kpi__nombre">Insumos en catálogo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ conteos.matrices }}</span><span class="kpi__nombre">Matrices de costo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ conteos.conceptos }}</span><span class="kpi__nombre">Conceptos</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ conteos.estimaciones }}</span><span class="kpi__nombre">Estimaciones</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ conteos.tareas }}</span><span class="kpi__nombre">Tareas</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ valor_bodega | money }}</span><span class="kpi__nombre">Valor en bodega</span></div>
+</div>
+
+<h2 class="subtitulo">Proyectos</h2>
+<div class="rejilla rejilla--tarjetas">
+  {% for p in proyectos %}
+    <div class="tarjeta">
+      <div class="tarjeta__clave">{{ p.clave }}</div>
+      <div class="tarjeta__titulo">{{ p.nombre }}</div>
+      <dl class="mini">
+        <div><dt>Presupuesto</dt><dd>{{ p.presupuesto | money }}</dd></div>
+        <div><dt>Con IVA</dt><dd>{{ p.importe_total | money }}</dd></div>
+        <div><dt>Avance físico</dt><dd>{{ p.avance | num }} %</dd></div>
+        <div><dt>Estimado</dt><dd>{{ p.estimado | money }}</dd></div>
+        <div><dt>Cobrado</dt><dd>{{ p.cobrado | money }}</dd></div>
+        <div><dt>SPI / CPI</dt><dd>{{ p.spi }} / {{ p.cpi }}</dd></div>
+      </dl>
+      <div class="tarjeta__acciones">
+        <a class="boton boton--chico" href="{{ url_for('presupuesto.hoja_presupuesto', proyecto_id=p.id) }}">Presupuesto</a>
+        <a class="boton boton--chico boton--claro" href="{{ url_for('planeacion.programa', proyecto_id=p.id) }}">Programa</a>
+        <a class="boton boton--chico boton--claro" href="{{ url_for('administracion.proyecto_valor_ganado', proyecto_id=p.id) }}">Valor ganado</a>
+      </div>
+    </div>
+  {% else %}
+    <p class="vacio">Sin proyectos todavía.</p>
+  {% endfor %}
+</div>
+
+<h2 class="subtitulo">Mayor valor en almacén</h2>
+<div class="tarjeta">
+  <table class="tabla tabla--compacta">
+    <thead><tr><th>Insumo</th><th class="der">Existencia</th><th>Unidad</th><th class="der">Costo promedio</th><th class="der">Importe</th></tr></thead>
+    <tbody>
+      {% for e in top_bodega %}
+        <tr>
+          <td>{{ e.clave }} · {{ e.descripcion }}</td>
+          <td class="der">{{ e.cantidad | qty }}</td>
+          <td>{{ e.unidad }}</td>
+          <td class="der">{{ e.costo_promedio | money }}</td>
+          <td class="der">{{ e.importe | money }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="vacio">La bodega está vacía.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

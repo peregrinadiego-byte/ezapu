@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>{{ titulo_documento }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ezapu.css') }}">
+</head>
+<body class="impreso">
+  <div class="no-imprimir barra-impresion">
+    <button class="boton" onclick="window.print()">Imprimir / Guardar PDF</button>
+    <a class="boton boton--claro" href="javascript:history.back()">Volver</a>
+  </div>
+
+  <header class="impreso__encabezado">
+    <div>
+      <div class="impreso__empresa">{{ empresa.nombre if empresa else 'Empresa' }}</div>
+      <div class="impreso__empresa-datos">
+        {{ empresa.rfc and 'RFC ' ~ empresa.rfc }} {{ empresa.direccion or '' }}
+      </div>
+    </div>
+    <div class="impreso__titulo">
+      <h1>{{ titulo_documento }}</h1>
+      {% block subtitulo %}{% endblock %}
+    </div>
+  </header>
+
+  {% block cuerpo %}{% endblock %}
+
+  <footer class="impreso__pie">
+    <span>Generado con EZAPU</span>
+    <span>{{ fecha_generacion }}</span>
+  </footer>
+</body>
+</html>

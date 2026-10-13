@@ -1,0 +1,35 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">Estado de cuenta · {{ proyecto.clave }} · {{ proyecto.nombre }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>Número</th><th>Tipo</th><th>Periodo</th><th>Estatus</th>
+    <th class="der">Subtotal</th><th class="der">IVA</th><th class="der">Amort.</th>
+    <th class="der">Retención</th><th class="der">Total</th><th class="der">Pagado</th><th class="der">Saldo</th></tr></thead>
+  <tbody>
+    {% for e in cuenta.estimaciones %}
+      <tr>
+        <td>{{ e.numero }}</td><td>{{ e.tipo }}</td>
+        <td>{{ e.periodo_inicio | fecha }} – {{ e.periodo_fin | fecha }}</td>
+        <td>{{ e.estatus }}</td>
+        <td class="der">{{ e.subtotal | money }}</td>
+        <td class="der">{{ e.iva | money }}</td>
+        <td class="der">{{ e.amortizacion | money }}</td>
+        <td class="der">{{ e.retencion | money }}</td>
+        <td class="der">{{ e.total | money }}</td>
+        <td class="der">{{ e.pagado | money }}</td>
+        <td class="der">{{ e.saldo | money }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="11" class="vacio">Sin estimaciones registradas.</td></tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><td colspan="8"><b>Totales</b></td>
+      <td class="der"><b>{{ cuenta.total_estimado | money }}</b></td>
+      <td class="der"><b>{{ cuenta.total_pagado | money }}</b></td>
+      <td class="der"><b>{{ cuenta.total_pendiente | money }}</b></td></tr>
+  </tfoot>
+</table>
+{% endblock %}

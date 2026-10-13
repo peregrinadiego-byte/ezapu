@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Valor ganado{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Valor ganado y curva S</h1>
+  <p class="ayuda">PV (valor planeado), EV (valor ganado) y AC (costo real) con los índices SPI y CPI.</p>
+</div>
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Proyecto</th><th class="der">BAC</th><th class="der">EV</th><th class="der">AC</th>
+      <th class="der">SPI</th><th class="der">CPI</th><th class="acciones"></th></tr></thead>
+    <tbody>
+      {% for p in proyectos %}
+        <tr>
+          <td><b>{{ p.clave }}</b> · {{ p.nombre }}</td>
+          <td class="der">{{ p.bac | money }}</td>
+          <td class="der">{{ p.ev | money }}</td>
+          <td class="der">{{ p.ac | money }}</td>
+          <td class="der">{{ p.spi }}</td>
+          <td class="der">{{ p.cpi }}</td>
+          <td class="acciones">
+            <a class="boton boton--chico" href="{{ url_for('administracion.proyecto_valor_ganado', proyecto_id=p.id) }}">Abrir</a>
+            <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.valor_ganado_reporte', proyecto_id=p.id) }}">Imprimir</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="vacio">Sin proyectos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

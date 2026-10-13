@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block titulo %}Estimación {{ estimacion.numero }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Estimación {{ estimacion.numero }} · {{ estimacion.proyecto }}</h1>
+  <p class="ayuda">
+    Periodo {{ estimacion.periodo_inicio | fecha }} – {{ estimacion.periodo_fin | fecha }}
+    · Tipo {{ estimacion.tipo }}
+    {% if estimacion.contratista %} · Contratista: {{ estimacion.contratista }}{% endif %}
+  </p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ estimacion.subtotal | money }}</span><span class="kpi__nombre">Subtotal</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ estimacion.iva | money }}</span><span class="kpi__nombre">IVA</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ estimacion.amortizacion | money }}</span><span class="kpi__nombre">Amortización de anticipo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ estimacion.retencion | money }}</span><span class="kpi__nombre">Retención</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ estimacion.total | money }}</span><span class="kpi__nombre">Total de la estimación</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ estimacion.saldo | money }}</span><span class="kpi__nombre">Saldo por pagar</span></div>
+</div>
+
+<form method="post" action="{{ url_for('control.estimacion_cantidades', estimacion_id=estimacion.id) }}">
+  <div class="barra-herramientas">
+    <div class="barra-herramientas__acciones">
+      <label class="campo campo--linea">
+        <span class="campo__etiqueta">Estatus</span>
+        <select name="estatus">
+          {% for valor in ['borrador', 'enviada', 'autorizada', 'pagada'] %}
+            <option value="{{ valor }}" {{ 'selected' if estimacion.estatus == valor }}>{{ valor }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="boton" type="submit">Guardar cantidades</button>
+      <a class="boton boton--claro" href="{{ url_for('control.estimaciones', proyecto_id=estimacion.proyecto_id) }}">Volver</a>
+      <a class="boton boton--claro" href="{{ url_for('reportes.estimacion', estimacion_id=estimacion.id) }}">Imprimir</a>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <table class="tabla">
+      <thead><tr><th>Clave</th><th>Descripción</th><th>Unidad</th>
+        <th class="der">Anterior</th><th class="der">Esta estimación</th><th class="der">Acumulado</th>
+        <th class="der">P.U.</th><th class="der">Importe</th></tr></thead>
+      <tbody>
+        {% for d in estimacion.detalle %}
+          <tr>
+            <td>{{ d.clave }}</td>
+            <td>{{ d.descripcion }}</td>
+            <td>{{ d.unidad or '—' }}</td>
+            <td class="der">{{ d.cantidad_anterior | qty }}</td>
+            <td class="der">
+              <input class="entrada-mini" type="number" step="any" name="cantidad_{{ d.id }}"
+                     value="{{ d.cantidad_actual }}" data-cantidad="{{ d.pu }}">
+            </td>
+            <td class="der">{{ d.cantidad_total | qty }}</td>
+            <td class="der">{{ d.pu | money }}</td>
+            <td class="der">{{ d.importe | money }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="vacio">Sin renglones: usa «Sincronizar» para traer el catálogo de conceptos.</td></tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><th colspan="7">Subtotal</th><th class="der">{{ estimacion.subtotal | money }}</th></tr>
+        <tr><td colspan="7">IVA</td><td class="der">{{ estimacion.iva | money }}</td></tr>
+        <tr><td colspan="7">Amortización / retención</td><td class="der">-{{ (estimacion.amortizacion + estimacion.retencion) | money }}</td></tr>
+        <tr class="renglon-total"><th colspan="7">Total</th><th class="der">{{ estimacion.total | money }}</th></tr>
+      </tfoot>
+    </table>
+  </div>
+</form>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Pagos aplicados</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Fecha</th><th>Referencia</th><th>Medio</th><th class="der">Monto</th></tr></thead>
+      <tbody>
+        {% for p in estimacion.pagos %}
+          <tr><td>{{ p.fecha | fecha }}</td><td>{{ p.referencia or '—' }}</td><td>{{ p.medio }}</td>
+            <td class="der">{{ p.monto | money }}</td></tr>
+        {% else %}
+          <tr><td colspan="4" class="vacio">Sin pagos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <form method="post" action="{{ url_for('control.estimacion_pago', estimacion_id=estimacion.id) }}" class="formulario">
+      <div class="formulario__rejilla">
+        <label class="campo"><span class="campo__etiqueta">Fecha</span><input type="date" name="fecha"></label>
+        <label class="campo"><span class="campo__etiqueta">Monto</span><input type="number" step="any" name="monto" value="{{ estimacion.saldo }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Referencia</span><input type="text" name="referencia"></label>
+        <label class="campo"><span class="campo__etiqueta">Medio</span><input type="text" name="medio" value="transferencia"></label>
+      </div>
+      <div class="formulario__acciones"><button class="boton" type="submit">Registrar pago</button></div>
+    </form>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Acciones</h2>
+    <form class="en-linea" method="post" action="{{ url_for('control.estimacion_sincronizar', estimacion_id=estimacion.id) }}">
+      <button class="boton boton--claro" type="submit">Sincronizar con el catálogo de conceptos</button>
+    </form>
+    <form class="en-linea" method="post" data-confirmar="¿Eliminar la estimación completa?"
+          action="{{ url_for('control.estimacion_eliminar', estimacion_id=estimacion.id) }}">
+      <button class="boton boton--peligro" type="submit">Eliminar estimación</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

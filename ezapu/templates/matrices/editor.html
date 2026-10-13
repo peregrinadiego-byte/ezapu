@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block titulo %}Matriz {{ matriz.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Matriz {{ matriz.clave }} · {{ matriz.descripcion }}</h1>
+  <p class="ayuda">
+    Tipo: <span class="etiqueta">{{ matriz.tipo }}</span>
+    {% if matriz.unidad %} · Unidad: {{ matriz.unidad }}{% endif %}
+    {% if matriz.proyecto %} · Proyecto: {{ matriz.proyecto }}{% endif %}
+    <a class="enlace-simple" href="{{ url_for('catalogos.editar', tabla='matriz', row_id=matriz.id) }}">Editar datos de la matriz</a>
+  </p>
+</div>
+
+{% if error %}<div class="aviso aviso--error">{{ error }}</div>{% endif %}
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ costo_directo | money }}</span><span class="kpi__nombre">Costo directo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ matriz.costo_indirecto_pct | num }} %</span><span class="kpi__nombre">Indirectos propios</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ precio | money }}</span><span class="kpi__nombre">Precio unitario</span></div>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>#</th><th>Tipo</th><th>Clave</th><th>Descripción</th><th>Unidad</th>
+        <th class="der">Rendimiento</th><th class="der">Costo unitario</th><th class="der">Importe</th><th class="acciones"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in componentes %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><span class="etiqueta {{ 'etiqueta--aux' if c.es_auxiliar }}">{{ 'Submatriz' if c.es_auxiliar else 'Insumo' }}</span></td>
+          <td>
+            {% if c.es_auxiliar %}
+              <a href="{{ url_for('matrices.editor', matriz_id=c.submatriz_id) }}">{{ c.clave }}</a>
+            {% else %}{{ c.clave }}{% endif %}
+          </td>
+          <td>{{ c.descripcion }}</td>
+          <td>{{ c.unidad or '—' }}</td>
+          <td class="der">
+            <form class="en-linea" method="post"
+                  action="{{ url_for('matrices.actualizar_componente', matriz_id=matriz.id, detalle_id=c.id) }}">
+              <input class="entrada-mini" type="number" step="any" name="cantidad" value="{{ c.cantidad }}">
+              <button class="boton boton--chico boton--claro" type="submit">↵</button>
+            </form>
+          </td>
+          <td class="der">{{ c.costo_unitario | money }}</td>
+          <td class="der">{{ c.importe | money }}</td>
+          <td class="acciones">
+            <form class="en-linea" method="post" data-confirmar="¿Quitar este componente?"
+                  action="{{ url_for('matrices.eliminar_componente', matriz_id=matriz.id, detalle_id=c.id) }}">
+              <button class="boton boton--chico boton--peligro" type="submit">Quitar</button>
+            </form>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9" class="vacio">Esta matriz aún no tiene componentes.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><th colspan="7">Costo directo</th><th class="der">{{ costo_directo | money }}</th><th></th></tr>
+    </tfoot>
+  </table>
+</div>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Agregar insumo</h2>
+    <form method="post" action="{{ url_for('matrices.agregar_componente', matriz_id=matriz.id) }}" class="formulario">
+      <label class="campo">
+        <span class="campo__etiqueta">Insumo</span>
+        <select name="recurso_id">
+          <option value="">— seleccionar —</option>
+          {% for valor, texto in recursos %}<option value="{{ valor }}">{{ texto }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="campo">
+        <span class="campo__etiqueta">Rendimiento (cantidad por unidad)</span>
+        <input type="number" step="any" name="cantidad" value="1">
+      </label>
+      <button class="boton" type="submit">Agregar insumo</button>
+    </form>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Agregar submatriz (auxiliar)</h2>
+    <form method="post" action="{{ url_for('matrices.agregar_componente', matriz_id=matriz.id) }}" class="formulario">
+      <label class="campo">
+        <span class="campo__etiqueta">Matriz</span>
+        <select name="submatriz_id">
+          <option value="">— seleccionar —</option>
+          {% for m in matrices %}<option value="{{ m.id }}">{{ m.clave }} · {{ m.descripcion }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="campo">
+        <span class="campo__etiqueta">Rendimiento</span>
+        <input type="number" step="any" name="cantidad" value="1">
+      </label>
+      <button class="boton" type="submit">Agregar submatriz</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Estructura de trabajos{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Estructura de trabajos y programa de obra</h1>
+  <p class="ayuda">Planeación del proyecto: EDT, calendario, avance y diagrama de Gantt.</p>
+</div>
+<div class="rejilla rejilla--tarjetas">
+  {% for p in proyectos %}
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('planeacion.programa', proyecto_id=p.id) }}">
+      <div class="tarjeta__clave">{{ p.clave }}</div>
+      <div class="tarjeta__titulo">{{ p.nombre }}</div>
+      <dl class="mini">
+        <div><dt>Tareas</dt><dd>{{ p.tareas }}</dd></div>
+        <div><dt>Avance</dt><dd>{{ p.avance | num }} %</dd></div>
+        <div><dt>Periodo</dt><dd>{{ p.fecha_apertura | fecha }} – {{ p.fecha_cierre | fecha }}</dd></div>
+      </dl>
+    </a>
+  {% else %}
+    <p class="vacio">Sin proyectos.</p>
+  {% endfor %}
+</div>
+{% endblock %}

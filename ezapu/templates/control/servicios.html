@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block titulo %}Estado de servicios · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Estado de servicios · {{ proyecto.clave }}</h1>
+  <p class="ayuda">Insumos requeridos por el presupuesto contra lo realmente consumido en obra.</p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ costo_presupuestado | money }}</span><span class="kpi__nombre">Costo requerido</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ costo_real | money }}</span><span class="kpi__nombre">Costo consumido</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ (costo_presupuestado - costo_real) | money }}</span><span class="kpi__nombre">Diferencia</span></div>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Insumo</th><th>Tarea</th><th>Unidad</th>
+      <th class="der">Requerido</th><th class="der">Consumido</th><th class="der">Diferencia</th>
+      <th class="der">Avance</th><th class="der">Costo consumido</th></tr></thead>
+    <tbody>
+      {% for d in detalle %}
+        <tr>
+          <td><b>{{ d.clave }}</b> · {{ d.descripcion }}</td>
+          <td>{{ d.tarea }}</td>
+          <td>{{ d.unidad or '—' }}</td>
+          <td class="der">{{ d.cantidad_requerida | qty }}</td>
+          <td class="der">{{ d.cantidad_consumida | qty }}</td>
+          <td class="der {{ 'negativo' if d.diferencia < 0 }}">{{ d.diferencia | qty }}</td>
+          <td class="der">{{ d.avance_pct }} %</td>
+          <td class="der">{{ d.importe | money }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="vacio">Sin consumos registrados.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Consumo por tarea</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Tarea</th><th class="der">Renglones</th><th class="der">Importe</th></tr></thead>
+      <tbody>
+        {% for t in por_tarea %}
+          <tr><td>{{ t.tarea_clave or '—' }} {{ t.tarea or '' }}</td>
+            <td class="der">{{ t.partidas }}</td><td class="der">{{ t.importe | money }}</td></tr>
+        {% else %}
+          <tr><td colspan="3" class="vacio">Sin información.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="tarjeta">
+    <h2>Requisiciones</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Folio</th><th>Fecha</th><th>Estado</th><th class="der">Renglones</th></tr></thead>
+      <tbody>
+        {% for q in requisiciones %}
+          <tr><td>{{ q.folio }}</td><td>{{ q.fecha | fecha }}</td>
+            <td><span class="etiqueta">{{ q.estado }}</span></td><td class="der">{{ q.renglones }}</td></tr>
+        {% else %}
+          <tr><td colspan="4" class="vacio">Sin requisiciones.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

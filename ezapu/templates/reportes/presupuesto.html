@@ -1,0 +1,43 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">{{ proyecto.clave }} · {{ proyecto.nombre }}</div>
+  <div class="impreso__sub">{{ proyecto.ubicacion or '' }} · {{ proyecto.fecha_apertura | fecha }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead>
+    <tr><th>Clave</th><th>Descripción</th><th>Unidad</th><th class="der">Volumen</th>
+        <th class="der">P.U.</th><th class="der">Importe</th></tr>
+  </thead>
+  <tbody>
+    {% for f in filas %}
+      {% if f.get('es_concepto') %}
+        <tr>
+          <td style="padding-left: {{ 4 + (f.nivel_calc or 0) * 12 }}px">{{ f.clave }}</td>
+          <td>{{ f.descripcion }}</td>
+          <td>{{ f.unidad or '' }}</td>
+          <td class="der">{{ f.cantidad | qty }}</td>
+          <td class="der">{{ f.pu | money }}</td>
+          <td class="der">{{ f.importe | money }}</td>
+        </tr>
+      {% else %}
+        <tr class="impreso__partida">
+          <td style="padding-left: {{ 4 + (f.nivel_calc or 0) * 12 }}px"><b>{{ f.clave }}</b></td>
+          <td colspan="4"><b>{{ f.nombre }}</b></td>
+          <td class="der"><b>{{ f.get('total') | money }}</b></td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><td colspan="5">Costo directo</td><td class="der">{{ resumen.costo_directo | money }}</td></tr>
+    <tr><td colspan="5">Indirectos ({{ resumen.pct_indirectos | num }} %)</td><td class="der">{{ resumen.indirectos | money }}</td></tr>
+    <tr><td colspan="5">Utilidad ({{ resumen.pct_utilidad | num }} %)</td><td class="der">{{ resumen.utilidad | money }}</td></tr>
+    <tr><td colspan="5">Financiamiento ({{ resumen.pct_financiamiento | num }} %)</td><td class="der">{{ resumen.financiamiento | money }}</td></tr>
+    <tr><td colspan="5">Cargos adicionales ({{ resumen.pct_cargos_adicionales | num }} %)</td><td class="der">{{ resumen.cargos_adicionales | money }}</td></tr>
+    <tr><td colspan="5"><b>Subtotal</b></td><td class="der"><b>{{ resumen.subtotal | money }}</b></td></tr>
+    <tr><td colspan="5">IVA ({{ resumen.pct_iva | num }} %)</td><td class="der">{{ resumen.iva | money }}</td></tr>
+    <tr class="impreso__total"><td colspan="5"><b>Total</b></td><td class="der"><b>{{ resumen.total | money }}</b></td></tr>
+  </tfoot>
+</table>
+{% endblock %}

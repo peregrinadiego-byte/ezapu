@@ -1,0 +1,23 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">Inventario · {{ almacen.clave }} · {{ almacen.nombre }}</div>
+  <div class="impreso__sub">{{ almacen.ubicacion or '' }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>Clave</th><th>Descripción</th><th>Unidad</th>
+    <th class="der">Existencia</th><th class="der">Costo promedio</th><th class="der">Importe</th></tr></thead>
+  <tbody>
+    {% for i in inventario %}
+      <tr>
+        <td>{{ i.clave }}</td><td>{{ i.descripcion }}</td><td>{{ i.unidad or '' }}</td>
+        <td class="der">{{ i.cantidad | qty }}</td>
+        <td class="der">{{ i.costo_promedio | money }}</td>
+        <td class="der">{{ i.importe | money }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot><tr><td colspan="5"><b>Total del inventario</b></td>
+    <td class="der"><b>{{ total | money }}</b></td></tr></tfoot>
+</table>
+{% endblock %}

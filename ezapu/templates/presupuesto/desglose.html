@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block titulo %}Desglose {{ info.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>{{ info.clave }} · {{ info.descripcion }}</h1>
+  <p class="ayuda">
+    {{ info.matriz_descripcion or 'Sin matriz asignada' }}
+    · Unidad {{ info.unidad or '—' }}
+    · Volumen {{ info.cantidad | qty }}
+    · Importe {{ info.importe | money }}
+  </p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ info.costo_directo | money }}</span><span class="kpi__nombre">Costo directo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ info.costo_indirecto_pct | num }} %</span><span class="kpi__nombre">Indirectos</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ info.pu | money }}</span><span class="kpi__nombre">Precio unitario</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ info.importe | money }}</span><span class="kpi__nombre">Importe</span></div>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead>
+      <tr><th>#</th><th>Tipo</th><th>Clave</th><th>Descripción</th><th>Unidad</th>
+          <th class="der">Rendimiento</th><th class="der">Costo unitario</th><th class="der">Importe</th></tr>
+    </thead>
+    <tbody>
+      {% for c in info.componentes %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td><span class="etiqueta {{ 'etiqueta--aux' if c.es_auxiliar }}">{{ 'Submatriz' if c.es_auxiliar else 'Insumo' }}</span></td>
+          <td>{{ c.clave }}</td>
+          <td>{{ c.descripcion }}</td>
+          <td>{{ c.unidad or '—' }}</td>
+          <td class="der">{{ c.cantidad | qty }}</td>
+          <td class="der">{{ c.costo_unitario | money }}</td>
+          <td class="der">{{ c.importe | money }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="8" class="vacio">Concepto sin matriz: captura el precio unitario directamente.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

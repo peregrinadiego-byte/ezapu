@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Explosión de insumos · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Explosión de insumos · {{ proyecto.clave }}</h1>
+  <p class="ayuda">{{ proyecto.nombre }} · {{ filas | length }} insumos · Importe {{ total | money }}</p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  {% for r in resumen %}
+    <div class="kpi"><span class="kpi__valor">{{ r.importe | money }}</span>
+      <span class="kpi__nombre">{{ TIPOS_RECURSO.get(r.tipo, r.tipo) }} · {{ r.partidas }}</span></div>
+  {% endfor %}
+</div>
+
+<div class="barra-herramientas">
+  <div class="barra-herramientas__acciones">
+    <a class="boton" href="{{ url_for('presupuesto.explosion_csv', proyecto_id=proyecto.id) }}">Excel/CSV</a>
+    <a class="boton boton--claro" href="{{ url_for('presupuesto.suministros', proyecto_id=proyecto.id) }}">Programa de suministros</a>
+    <a class="boton boton--claro" href="{{ url_for('reportes.explosion', proyecto_id=proyecto.id) }}">Imprimir</a>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Tipo</th><th>Clave</th><th>Descripción</th><th>Unidad</th>
+      <th class="der">Cantidad</th><th class="der">Costo unitario</th><th class="der">Importe</th></tr></thead>
+    <tbody>
+      {% for f in filas %}
+        <tr>
+          <td><span class="etiqueta">{{ TIPOS_RECURSO.get(f.tipo, f.tipo) }}</span></td>
+          <td>{{ f.clave }}</td>
+          <td>{{ f.descripcion }}</td>
+          <td>{{ f.unidad or '—' }}</td>
+          <td class="der">{{ f.cantidad | qty }}</td>
+          <td class="der">{{ f.costo_unitario | money }}</td>
+          <td class="der">{{ f.importe | money }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="vacio">El presupuesto no tiene conceptos con matriz asignada.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot><tr><th colspan="6">Total de la explosión</th><th class="der">{{ total | money }}</th></tr></tfoot>
+  </table>
+</div>
+{% endblock %}

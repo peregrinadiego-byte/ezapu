@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block titulo %}Valor ganado · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Valor ganado · {{ proyecto.clave }}</h1>
+  <p class="ayuda">{{ proyecto.nombre }}
+    {% if not kpi.get('sin_presupuesto') %} · Periodo {{ kpi.inicio | fecha }} – {{ kpi.fin | fecha }}{% endif %}
+  </p>
+</div>
+
+{% if kpi.get('sin_presupuesto') %}
+  <div class="aviso aviso--info">El proyecto no tiene presupuesto capturado: no se puede calcular el valor ganado.</div>
+{% else %}
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ kpi.bac | money }}</span><span class="kpi__nombre">BAC · presupuesto</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ kpi.pv | money }}</span><span class="kpi__nombre">PV · valor planeado</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ kpi.ev | money }}</span><span class="kpi__nombre">EV · valor ganado</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ kpi.ac | money }}</span><span class="kpi__nombre">AC · costo real</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ kpi.spi }}</span><span class="kpi__nombre">SPI · desempeño de plazo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ kpi.cpi }}</span><span class="kpi__nombre">CPI · desempeño de costo</span></div>
+</div>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Curva S</h2>
+    <div class="grafica">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <line x1="0" y1="100" x2="100" y2="100" class="grafica__eje"></line>
+        <line x1="0" y1="0" x2="0" y2="100" class="grafica__eje"></line>
+        <polyline class="grafica__linea grafica__linea--pv" points="{{ puntos.pv }}"></polyline>
+        <polyline class="grafica__linea grafica__linea--ev" points="{{ puntos.ev }}"></polyline>
+        <polyline class="grafica__linea grafica__linea--ac" points="{{ puntos.ac }}"></polyline>
+      </svg>
+    </div>
+    <div class="leyenda">
+      <span class="leyenda__item leyenda__item--pv">PV planeado</span>
+      <span class="leyenda__item leyenda__item--ev">EV ganado</span>
+      <span class="leyenda__item leyenda__item--ac">AC real</span>
+      <span class="leyenda__item">Máximo del periodo: {{ maximo | money }}</span>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Pronóstico</h2>
+    <table class="tabla tabla--compacta">
+      <tbody>
+        <tr><td>Variación de plazo (SV)</td><td class="der">{{ kpi.sv | money }}</td></tr>
+        <tr><td>Variación de costo (CV)</td><td class="der">{{ kpi.cv | money }}</td></tr>
+        <tr><td>Estimación a la conclusión (EAC)</td><td class="der">{{ kpi.eac | money }}</td></tr>
+        <tr><td>Costo restante (ETC)</td><td class="der">{{ kpi.etc | money }}</td></tr>
+        <tr><td>Variación final (VAC)</td><td class="der">{{ kpi.vac | money }}</td></tr>
+        <tr><td>Avance físico</td><td class="der">{{ kpi.avance_fisico }} %</td></tr>
+        <tr><td>Avance planeado</td><td class="der">{{ kpi.avance_planeado }} %</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <h2>Serie del periodo</h2>
+  <table class="tabla tabla--compacta">
+    <thead><tr><th>Fecha</th><th class="der">PV</th><th class="der">EV</th><th class="der">AC</th></tr></thead>
+    <tbody>
+      {% for p in serie %}
+        <tr><td>{{ p.fecha | fecha }}</td>
+          <td class="der">{{ p.pv | money }}</td>
+          <td class="der">{{ p.ev | money }}</td>
+          <td class="der">{{ p.ac | money }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Estructura de costos</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Clave</th><th>Centro de costo</th><th class="der">Presupuesto</th></tr></thead>
+      <tbody>
+        {% for c in centros %}
+          <tr><td style="padding-left: {{ 8 + (c.nivel_calc or 0) * 14 }}px">{{ c.clave }}</td>
+            <td>{{ c.nombre }}</td><td class="der">{{ c.get('presupuesto_total') | money }}</td></tr>
+        {% else %}
+          <tr><td colspan="3" class="vacio">Sin centros de costo.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="tarjeta">
+    <h2>Estructura de organización</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Clave</th><th>Unidad</th><th>Responsable</th></tr></thead>
+      <tbody>
+        {% for o in organizacion %}
+          <tr><td style="padding-left: {{ 8 + (o.nivel_calc or 0) * 14 }}px">{{ o.clave }}</td>
+            <td>{{ o.nombre }}</td><td>{{ o.responsable or '—' }}</td></tr>
+        {% else %}
+          <tr><td colspan="3" class="vacio">Sin estructura de organización.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

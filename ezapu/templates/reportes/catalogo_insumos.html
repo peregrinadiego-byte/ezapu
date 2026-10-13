@@ -1,0 +1,18 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}<div class="impreso__sub">Catálogo general de insumos</div>{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>Tipo</th><th>Clave</th><th>Descripción</th><th>Unidad</th><th>Familia</th>
+    <th class="der">Costo vigente</th></tr></thead>
+  <tbody>
+    {% for i in insumos %}
+      <tr>
+        <td>{{ TIPOS_RECURSO.get(i.tipo, i.tipo) }}</td>
+        <td>{{ i.clave }}</td><td>{{ i.descripcion }}</td>
+        <td>{{ i.unidad or '' }}</td><td>{{ i.familia or '' }}</td>
+        <td class="der">{{ i.costo_vigente | money }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

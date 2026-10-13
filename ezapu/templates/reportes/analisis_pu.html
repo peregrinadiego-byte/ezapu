@@ -1,0 +1,30 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">Matriz {{ matriz.clave }} · {{ matriz.descripcion }}</div>
+  <div class="impreso__sub">Unidad: {{ matriz.unidad or '—' }}{% if proyecto %} · Proyecto {{ proyecto.clave }}{% endif %}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>#</th><th>Tipo</th><th>Clave</th><th>Descripción</th><th>Unidad</th>
+    <th class="der">Rendimiento</th><th class="der">Costo unitario</th><th class="der">Importe</th></tr></thead>
+  <tbody>
+    {% for c in componentes %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ 'Submatriz' if c.es_auxiliar else 'Insumo' }}</td>
+        <td>{{ c.clave }}</td><td>{{ c.descripcion }}</td><td>{{ c.unidad or '' }}</td>
+        <td class="der">{{ c.cantidad | qty }}</td>
+        <td class="der">{{ c.costo_unitario | money }}</td>
+        <td class="der">{{ c.importe | money }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><td colspan="7"><b>Costo directo</b></td><td class="der"><b>{{ costo_directo | money }}</b></td></tr>
+    <tr><td colspan="7">Indirectos propios ({{ matriz.costo_indirecto_pct | num }} %)</td>
+        <td class="der">{{ (costo_directo * matriz.costo_indirecto_pct / 100) | money }}</td></tr>
+    <tr class="impreso__total"><td colspan="7"><b>Precio unitario</b></td>
+        <td class="der"><b>{{ (costo_directo * (1 + matriz.costo_indirecto_pct / 100)) | money }}</b></td></tr>
+  </tfoot>
+</table>
+{% endblock %}

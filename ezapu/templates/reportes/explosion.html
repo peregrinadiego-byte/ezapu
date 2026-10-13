@@ -1,0 +1,34 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">{{ proyecto.clave }} · {{ proyecto.nombre }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>Tipo</th><th>Clave</th><th>Descripción</th><th>Unidad</th>
+    <th class="der">Cantidad</th><th class="der">Costo unitario</th><th class="der">Importe</th></tr></thead>
+  <tbody>
+    {% for f in filas %}
+      <tr>
+        <td>{{ TIPOS_RECURSO.get(f.tipo, f.tipo) }}</td>
+        <td>{{ f.clave }}</td><td>{{ f.descripcion }}</td><td>{{ f.unidad or '' }}</td>
+        <td class="der">{{ f.cantidad | qty }}</td>
+        <td class="der">{{ f.costo_unitario | money }}</td>
+        <td class="der">{{ f.importe | money }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot><tr><td colspan="6"><b>Total de la explosión</b></td>
+    <td class="der"><b>{{ total | money }}</b></td></tr></tfoot>
+</table>
+
+<h3 class="impreso__seccion">Subtotales por tipo de insumo</h3>
+<table class="impreso__tabla impreso__tabla--angosta">
+  <thead><tr><th>Tipo</th><th class="der">Renglones</th><th class="der">Importe</th></tr></thead>
+  <tbody>
+    {% for r in resumen %}
+      <tr><td>{{ TIPOS_RECURSO.get(r.tipo, r.tipo) }}</td>
+        <td class="der">{{ r.partidas }}</td><td class="der">{{ r.importe | money }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

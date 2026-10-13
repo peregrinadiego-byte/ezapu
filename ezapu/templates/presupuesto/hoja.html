@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block titulo %}Presupuesto · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Hoja de presupuesto · {{ proyecto.clave }}</h1>
+  <p class="ayuda">{{ proyecto.nombre }} · {{ proyecto.ubicacion or '' }} · Moneda {{ proyecto.moneda }}</p>
+</div>
+
+<div class="rejilla rejilla--kpi">
+  <div class="kpi"><span class="kpi__valor">{{ resumen.costo_directo | money }}</span><span class="kpi__nombre">Costo directo</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ resumen.subtotal | money }}</span><span class="kpi__nombre">Subtotal</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ resumen.total | money }}</span><span class="kpi__nombre">Total con IVA</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ avance | num }} %</span><span class="kpi__nombre">Avance físico</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ cuenta.total_estimado | money }}</span><span class="kpi__nombre">Estimado</span></div>
+  <div class="kpi"><span class="kpi__valor">{{ cuenta.total_pendiente | money }}</span><span class="kpi__nombre">Por cobrar</span></div>
+</div>
+
+<div class="barra-herramientas">
+  <div class="barra-herramientas__acciones">
+    <form class="en-linea" method="post" action="{{ url_for('presupuesto.recalcular', proyecto_id=proyecto.id) }}">
+      <button class="boton boton--claro" type="submit">Recalcular precios unitarios</button>
+    </form>
+    <form class="en-linea" method="post" action="{{ url_for('presupuesto.aplicar_generadores', proyecto_id=proyecto.id) }}">
+      <button class="boton boton--claro" type="submit">Aplicar generadores</button>
+    </form>
+    <a class="boton boton--claro" href="{{ url_for('presupuesto.analisis', proyecto_id=proyecto.id) }}">Análisis del precio</a>
+    <a class="boton boton--claro" href="{{ url_for('presupuesto.explosion', proyecto_id=proyecto.id) }}">Explosión de insumos</a>
+    <a class="boton boton--claro" href="{{ url_for('reportes.presupuesto', proyecto_id=proyecto.id) }}">Imprimir</a>
+    <a class="boton" href="{{ url_for('reportes.csv_presupuesto', proyecto_id=proyecto.id) }}">Excel/CSV</a>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla tabla--presupuesto">
+    <thead>
+      <tr>
+        <th>Clave</th><th>Descripción</th><th>Unidad</th>
+        <th class="der">Volumen</th><th class="der">P.U.</th><th class="der">Importe</th><th class="acciones"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for f in filas %}
+        {% if f.get('es_concepto') %}
+          <tr class="renglon-concepto">
+            <td style="padding-left: {{ 8 + (f.nivel_calc or 0) * 16 }}px">{{ f.clave }}</td>
+            <td>
+              {{ f.descripcion }}
+              {% if f.matriz_clave %}<span class="etiqueta etiqueta--suave">{{ f.matriz_clave }}</span>{% endif %}
+            </td>
+            <td>{{ f.unidad or '—' }}</td>
+            <td class="der">{{ f.cantidad | qty }}</td>
+            <td class="der">{{ f.pu | money }}</td>
+            <td class="der">{{ f.importe | money }}</td>
+            <td class="acciones">
+              <a class="boton boton--chico boton--claro" href="{{ url_for('presupuesto.concepto_desglose', concepto_id=f.id) }}">Desglose</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('presupuesto.concepto_generadores', concepto_id=f.id) }}">Volúmenes</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr class="renglon-partida">
+            <td style="padding-left: {{ 8 + (f.nivel_calc or 0) * 16 }}px"><b>{{ f.clave }}</b></td>
+            <td colspan="4"><b>{{ f.nombre }}</b></td>
+            <td class="der"><b>{{ f.get('total') | money }}</b></td>
+            <td class="acciones"></td>
+          </tr>
+        {% endif %}
+      {% else %}
+        <tr><td colspan="7" class="vacio">El proyecto no tiene partidas ni conceptos.</td></tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr><th colspan="5">Costo directo</th><th class="der">{{ resumen.costo_directo | money }}</th><th></th></tr>
+      <tr><td colspan="5">Indirectos ({{ resumen.pct_indirectos | num }} %)</td><td class="der">{{ resumen.indirectos | money }}</td><td></td></tr>
+      <tr><td colspan="5">Utilidad ({{ resumen.pct_utilidad | num }} %)</td><td class="der">{{ resumen.utilidad | money }}</td><td></td></tr>
+      <tr><td colspan="5">Financiamiento ({{ resumen.pct_financiamiento | num }} %)</td><td class="der">{{ resumen.financiamiento | money }}</td><td></td></tr>
+      <tr><td colspan="5">Cargos adicionales ({{ resumen.pct_cargos_adicionales | num }} %)</td><td class="der">{{ resumen.cargos_adicionales | money }}</td><td></td></tr>
+      <tr><th colspan="5">Subtotal</th><th class="der">{{ resumen.subtotal | money }}</th><th></th></tr>
+      <tr><td colspan="5">IVA ({{ resumen.pct_iva | num }} %)</td><td class="der">{{ resumen.iva | money }}</td><td></td></tr>
+      <tr class="renglon-total"><th colspan="5">Total</th><th class="der">{{ resumen.total | money }}</th><th></th></tr>
+    </tfoot>
+  </table>
+</div>
+{% endblock %}

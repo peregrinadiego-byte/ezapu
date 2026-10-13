@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}{{ titulo }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>{{ titulo }}</h1>
+  <p class="ayuda">{{ descripcion }}</p>
+</div>
+<div class="rejilla rejilla--tarjetas">
+  {% for p in proyectos %}
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for(destino, proyecto_id=p.id) }}">
+      <div class="tarjeta__clave">{{ p.clave }}</div>
+      <div class="tarjeta__titulo">{{ p.nombre }}</div>
+      <div class="tarjeta__pie">
+        <span class="etiqueta etiqueta--suave">{{ p.tipo }}</span>
+        <span>{{ p.estado }}</span>
+      </div>
+    </a>
+  {% else %}
+    <p class="vacio">Todavía no hay proyectos. <a href="{{ url_for('catalogos.nuevo', tabla='proyecto') }}">Crea el primero</a>.</p>
+  {% endfor %}
+</div>
+{% endblock %}

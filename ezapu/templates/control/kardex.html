@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Kardex · {{ recurso.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Kardex · {{ recurso.clave }} · {{ recurso.descripcion }}</h1>
+  <p class="ayuda">Almacén {{ almacen.clave }} · {{ almacen.nombre }}</p>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Fecha</th><th>Tipo</th><th class="der">Cantidad</th>
+      <th class="der">Costo unitario</th><th class="der">Saldo</th><th>Documento</th><th>Proveedor</th></tr></thead>
+    <tbody>
+      {% for m in movimientos %}
+        <tr>
+          <td>{{ m.fecha | fecha }}</td>
+          <td><span class="etiqueta {{ 'etiqueta--ok' if m.tipo == 'entrada' }}">{{ m.tipo }}</span></td>
+          <td class="der">{{ m.cantidad | qty }}</td>
+          <td class="der">{{ m.costo_unitario | money }}</td>
+          <td class="der">{{ m.saldo | qty }}</td>
+          <td>{{ m.documento or '—' }}</td>
+          <td>{{ m.tercero or '—' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="7" class="vacio">Sin movimientos para este insumo.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

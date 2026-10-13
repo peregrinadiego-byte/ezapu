@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block titulo %}Análisis del precio · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Análisis del precio · {{ proyecto.clave }}</h1>
+  <p class="ayuda">Los porcentajes se aplican sobre el costo directo o sobre el acumulado, según la base elegida.</p>
+</div>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Parámetros</h2>
+    <form method="post" class="formulario">
+      <div class="formulario__rejilla">
+        <label class="campo"><span class="campo__etiqueta">Indirectos (%)</span>
+          <input type="number" step="any" name="pct_indirectos" value="{{ proyecto.pct_indirectos }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Utilidad (%)</span>
+          <input type="number" step="any" name="pct_utilidad" value="{{ proyecto.pct_utilidad }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Financiamiento (%)</span>
+          <input type="number" step="any" name="pct_financiamiento" value="{{ proyecto.pct_financiamiento }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Cargos adicionales (%)</span>
+          <input type="number" step="any" name="pct_cargos_adicionales" value="{{ proyecto.pct_cargos_adicionales }}"></label>
+        <label class="campo"><span class="campo__etiqueta">IVA (%)</span>
+          <input type="number" step="any" name="pct_iva" value="{{ proyecto.pct_iva }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Anticipo (%)</span>
+          <input type="number" step="any" name="anticipo_pct" value="{{ proyecto.anticipo_pct }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Retención (%)</span>
+          <input type="number" step="any" name="retencion_pct" value="{{ proyecto.retencion_pct }}"></label>
+        <label class="campo"><span class="campo__etiqueta">Amortización de anticipo (%)</span>
+          <input type="number" step="any" name="amortizacion_pct" value="{{ proyecto.amortizacion_pct }}"></label>
+        <label class="campo campo--ancho"><span class="campo__etiqueta">Base de aplicación</span>
+          <select name="base_indirectos">
+            <option value="directo" {{ 'selected' if proyecto.base_indirectos == 'directo' }}>Sobre el costo directo</option>
+            <option value="acumulado" {{ 'selected' if proyecto.base_indirectos == 'acumulado' }}>Sobre el acumulado (en cascada)</option>
+          </select></label>
+      </div>
+      <div class="formulario__acciones"><button class="boton" type="submit">Guardar parámetros</button></div>
+    </form>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Resumen económico</h2>
+    <table class="tabla tabla--compacta">
+      <tbody>
+        <tr><td>Costo directo</td><td class="der">{{ resumen.costo_directo | money }}</td></tr>
+        <tr><td>Indirectos ({{ resumen.pct_indirectos | num }} %)</td><td class="der">{{ resumen.indirectos | money }}</td></tr>
+        <tr><td>Utilidad ({{ resumen.pct_utilidad | num }} %)</td><td class="der">{{ resumen.utilidad | money }}</td></tr>
+        <tr><td>Financiamiento ({{ resumen.pct_financiamiento | num }} %)</td><td class="der">{{ resumen.financiamiento | money }}</td></tr>
+        <tr><td>Cargos adicionales ({{ resumen.pct_cargos_adicionales | num }} %)</td><td class="der">{{ resumen.cargos_adicionales | money }}</td></tr>
+        <tr class="renglon-total"><td>Subtotal</td><td class="der">{{ resumen.subtotal | money }}</td></tr>
+        <tr><td>IVA ({{ resumen.pct_iva | num }} %)</td><td class="der">{{ resumen.iva | money }}</td></tr>
+        <tr class="renglon-total"><td>Total del contrato</td><td class="der">{{ resumen.total | money }}</td></tr>
+        <tr><td>Anticipo ({{ resumen.anticipo_pct | num }} %)</td><td class="der">{{ resumen.anticipo | money }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <h2>Costo directo por partida</h2>
+  <table class="tabla tabla--compacta">
+    <thead><tr><th>Clave</th><th>Partida</th><th class="der">Costo directo</th></tr></thead>
+    <tbody>
+      {% for p in partidas %}
+        <tr><td>{{ p.clave }}</td><td>{{ p.nombre }}</td><td class="der">{{ p.directo | money }}</td></tr>
+      {% else %}
+        <tr><td colspan="3" class="vacio">Sin partidas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="tarjeta">
+  <h2>Escalatorias</h2>
+  <table class="tabla tabla--compacta">
+    <thead><tr><th>Periodo</th><th class="der">Factor</th></tr></thead>
+    <tbody>
+      {% for e in escalatorias %}
+        <tr><td>{{ e.periodo }}</td><td class="der">{{ e.factor | num }}</td></tr>
+      {% else %}
+        <tr><td colspan="2" class="vacio">Sin escalatorias registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

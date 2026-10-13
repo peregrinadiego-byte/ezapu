@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}Estimaciones{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Estimaciones</h1>
+  <p class="ayuda">Generación de estimaciones por periodo con acumulados, amortización de anticipo y retención.</p>
+</div>
+
+<div class="tarjeta">
+  <table class="tabla">
+    <thead><tr><th>Proyecto</th><th class="der">Estimaciones</th><th class="der">Estimado</th>
+      <th class="der">Pagado</th><th class="der">Pendiente</th><th class="acciones"></th></tr></thead>
+    <tbody>
+      {% for p in proyectos %}
+        <tr>
+          <td><b>{{ p.clave }}</b> · {{ p.nombre }}</td>
+          <td class="der">{{ p.estimaciones }}</td>
+          <td class="der">{{ p.estimado | money }}</td>
+          <td class="der">{{ p.pagado | money }}</td>
+          <td class="der">{{ p.pendiente | money }}</td>
+          <td class="acciones">
+            <a class="boton boton--chico" href="{{ url_for('control.estimaciones', proyecto_id=p.id) }}">Abrir</a>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6" class="vacio">Sin proyectos.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

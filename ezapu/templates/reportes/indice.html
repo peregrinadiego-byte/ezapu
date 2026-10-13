@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block titulo %}Reportes{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Reportes y formatos</h1>
+  <p class="ayuda">Formatos listos para imprimir o guardar como PDF (usa «Imprimir» del navegador)
+  y exportaciones a Excel/CSV.</p>
+</div>
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Por proyecto</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Proyecto</th><th class="acciones">Formatos</th></tr></thead>
+      <tbody>
+        {% for p in proyectos %}
+          <tr>
+            <td><b>{{ p.clave }}</b> · {{ p.nombre }}</td>
+            <td class="acciones">
+              <a class="boton boton--chico" href="{{ url_for('reportes.presupuesto', proyecto_id=p.id) }}">Presupuesto</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.catalogo_conceptos', proyecto_id=p.id) }}">Conceptos</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.explosion', proyecto_id=p.id) }}">Explosión</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.estado_cuenta', proyecto_id=p.id) }}">Estado de cuenta</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.valor_ganado_reporte', proyecto_id=p.id) }}">Valor ganado</a>
+              <a class="boton boton--chico" href="{{ url_for('reportes.csv_presupuesto', proyecto_id=p.id) }}">CSV</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="2" class="vacio">Sin proyectos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Catálogo de insumos y matrices</h2>
+    <p><a class="boton boton--claro" href="{{ url_for('reportes.catalogo_insumos') }}">Catálogo de insumos</a>
+       <a class="boton boton--claro" href="{{ url_for('reportes.csv_insumos') }}">CSV de insumos</a></p>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Matriz</th><th class="der">Costo directo</th><th class="acciones">Formato</th></tr></thead>
+      <tbody>
+        {% for m in matrices %}
+          <tr>
+            <td><b>{{ m.clave }}</b> · {{ m.descripcion }}</td>
+            <td class="der">{{ m.costo_directo | money }}</td>
+            <td class="acciones">
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.analisis_pu', matriz_id=m.id) }}">Análisis de P.U.</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.csv_matriz', matriz_id=m.id) }}">CSV</a>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" class="vacio">Sin matrices.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Bodega</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Almacén</th><th class="acciones">Formato</th></tr></thead>
+      <tbody>
+        {% for a in almacenes %}
+          <tr><td><b>{{ a.clave }}</b> · {{ a.nombre }}</td>
+            <td class="acciones">
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.bodega', almacen_id=a.id) }}">Inventario</a>
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.csv_bodega', almacen_id=a.id) }}">CSV</a>
+            </td></tr>
+        {% else %}
+          <tr><td colspan="2" class="vacio">Sin almacenes.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Estimaciones</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Estimación</th><th class="acciones">Formato</th></tr></thead>
+      <tbody>
+        {% for e in estimaciones %}
+          <tr><td><b>{{ e.proyecto }}</b> · {{ e.numero }} ({{ e.estatus }})</td>
+            <td class="acciones">
+              <a class="boton boton--chico boton--claro" href="{{ url_for('reportes.estimacion', estimacion_id=e.id) }}">Imprimir</a>
+            </td></tr>
+        {% else %}
+          <tr><td colspan="2" class="vacio">Sin estimaciones.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="ayuda">Exportaciones: 
+      {% for p in proyectos %}
+        <a class="enlace-simple" href="{{ url_for('reportes.csv_estimaciones', proyecto_id=p.id) }}">estimaciones de {{ p.clave }}</a>{% if not loop.last %} · {% endif %}
+      {% endfor %}
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block titulo %}Programa · {{ proyecto.clave }}{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Programa de obra · {{ proyecto.clave }}</h1>
+  <p class="ayuda">{{ proyecto.nombre }} · Avance ponderado {{ avance | num }} %
+    {% if gantt.inicio %} · del {{ gantt.inicio | fecha }} al {{ gantt.fin | fecha }} ({{ gantt.dias }} días){% endif %}
+  </p>
+</div>
+
+{% if gantt.inicio %}
+<div class="tarjeta">
+  <h2>Diagrama de Gantt</h2>
+  <div class="gantt">
+    <div class="gantt__escala">
+      {% for mes in gantt.meses %}
+        <div class="gantt__mes" style="left: {{ mes.offset_pct }}%; width: {{ mes.ancho_pct }}%">{{ mes.etiqueta }}</div>
+      {% endfor %}
+    </div>
+    {% for t in gantt.filas %}
+      <div class="gantt__fila">
+        <div class="gantt__etiqueta" title="{{ t.partida or '' }}">
+          <b>{{ t.clave }}</b> {{ t.nombre }}
+        </div>
+        <div class="gantt__pista">
+          <div class="gantt__barra {{ 'gantt__barra--terminado' if (t.avance or 0) >= 100 else ('gantt__barra--proceso' if (t.avance or 0) > 0 else '') }}"
+               style="left: {{ t.offset_pct }}%; width: {{ t.ancho_pct }}%;"
+               title="{{ t.inicio_txt }} → {{ t.fin_txt }} · {{ t.avance }} %">
+            <span class="gantt__avance" style="width: {{ t.avance or 0 }}%"></span>
+            <span class="gantt__texto">{{ t.avance | num }} %</span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+  <div class="aviso aviso--info">Este proyecto no tiene fechas capturadas en sus tareas.</div>
+{% endif %}
+
+<div class="rejilla rejilla--dos">
+  <div class="tarjeta">
+    <h2>Estructura de trabajos</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Clave</th><th>Tarea</th><th>Periodo</th><th class="der">Avance</th><th class="der">Importe</th></tr></thead>
+      <tbody>
+        {% for t in estructura %}
+          <tr>
+            <td style="padding-left: {{ 8 + (t.nivel_calc or 0) * 14 }}px">{{ t.clave }}</td>
+            <td>{{ t.nombre }}</td>
+            <td>{{ t.inicio | fecha }} – {{ t.fin | fecha }}</td>
+            <td class="der">{{ t.avance | num }} %</td>
+            <td class="der">{{ t.importe | money }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="vacio">Sin tareas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Actualizar avance</h2>
+    <table class="tabla tabla--compacta">
+      <thead><tr><th>Tarea</th><th class="der">Avance</th><th class="acciones"></th></tr></thead>
+      <tbody>
+        {% for t in tareas %}
+          <tr>
+            <td><b>{{ t.clave }}</b> {{ t.nombre }}
+              {% if t.predecesora %}<span class="etiqueta etiqueta--suave">después de {{ t.predecesora }}</span>{% endif %}
+            </td>
+            <td class="der">
+              <form class="en-linea" method="post" action="{{ url_for('planeacion.actualizar_avance', tarea_id=t.id) }}">
+                <input class="entrada-mini" type="number" step="any" min="0" max="100" name="avance" value="{{ t.avance }}">
+                <button class="boton boton--chico boton--claro" type="submit">↵</button>
+              </form>
+            </td>
+            <td class="acciones"><span class="etiqueta">{{ t.estado }}</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tarjeta">
+  <h2>Agregar tarea</h2>
+  <form method="post" action="{{ url_for('planeacion.nueva_tarea', proyecto_id=proyecto.id) }}" class="formulario">
+    <div class="formulario__rejilla">
+      <label class="campo"><span class="campo__etiqueta">Clave</span><input type="text" name="clave"></label>
+      <label class="campo"><span class="campo__etiqueta">Nombre</span><input type="text" name="nombre" required></label>
+      <label class="campo"><span class="campo__etiqueta">Inicio</span><input type="date" name="inicio"></label>
+      <label class="campo"><span class="campo__etiqueta">Fin</span><input type="date" name="fin"></label>
+      <label class="campo"><span class="campo__etiqueta">Peso relativo</span><input type="number" step="any" name="peso" value="1"></label>
+      <label class="campo"><span class="campo__etiqueta">Responsable</span><input type="text" name="responsable"></label>
+    </div>
+    <div class="formulario__acciones"><button class="boton" type="submit">Agregar tarea</button></div>
+  </form>
+</div>
+{% endblock %}

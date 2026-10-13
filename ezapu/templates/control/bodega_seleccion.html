@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titulo %}Bodega{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Estado de la bodega</h1>
+  <p class="ayuda">Existencias por almacén con costo promedio ponderado de las entradas.</p>
+</div>
+<div class="rejilla rejilla--tarjetas">
+  {% for a in almacenes %}
+    <a class="tarjeta tarjeta--enlace" href="{{ url_for('control.bodega', almacen_id=a.id) }}">
+      <div class="tarjeta__clave">{{ a.clave }}</div>
+      <div class="tarjeta__titulo">{{ a.nombre }}</div>
+      <dl class="mini">
+        <div><dt>Proyecto</dt><dd>{{ a.proyecto or '—' }}</dd></div>
+        <div><dt>Insumos</dt><dd>{{ a.partidas }}</dd></div>
+        <div><dt>Valor</dt><dd>{{ a.valor | money }}</dd></div>
+      </dl>
+    </a>
+  {% else %}
+    <p class="vacio">Sin almacenes. <a href="{{ url_for('catalogos.nuevo', tabla='almacen') }}">Crear almacén</a>.</p>
+  {% endfor %}
+</div>
+{% endblock %}

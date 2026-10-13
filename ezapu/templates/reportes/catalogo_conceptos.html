@@ -1,0 +1,22 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">{{ proyecto.clave }} · {{ proyecto.nombre }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>Clave</th><th>Descripción</th><th>Unidad</th><th>Matriz</th>
+    <th class="der">Volumen</th><th class="der">P.U.</th><th class="der">Importe</th></tr></thead>
+  <tbody>
+    {% for c in conceptos %}
+      <tr>
+        <td>{{ c.clave }}</td><td>{{ c.descripcion }}</td>
+        <td>{{ c.unidad or '' }}</td><td>{{ c.matriz or '' }}</td>
+        <td class="der">{{ c.cantidad | qty }}</td>
+        <td class="der">{{ c.pu | money }}</td>
+        <td class="der">{{ c.importe | money }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot><tr><td colspan="6"><b>Importe total</b></td><td class="der"><b>{{ importe | money }}</b></td></tr></tfoot>
+</table>
+{% endblock %}

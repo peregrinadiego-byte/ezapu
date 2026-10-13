@@ -1,0 +1,39 @@
+{% extends "reportes/base_impreso.html" %}
+{% block subtitulo %}
+  <div class="impreso__sub">Estimación {{ estimacion.numero }} · {{ estimacion.proyecto }}</div>
+  <div class="impreso__sub">Periodo {{ estimacion.periodo_inicio | fecha }} – {{ estimacion.periodo_fin | fecha }}
+    · Estatus {{ estimacion.estatus }}</div>
+{% endblock %}
+{% block cuerpo %}
+<table class="impreso__tabla">
+  <thead><tr><th>Clave</th><th>Descripción</th><th>Unidad</th>
+    <th class="der">Anterior</th><th class="der">Actual</th><th class="der">Acumulado</th>
+    <th class="der">P.U.</th><th class="der">Importe</th></tr></thead>
+  <tbody>
+    {% for d in estimacion.detalle %}
+      <tr>
+        <td>{{ d.clave }}</td><td>{{ d.descripcion }}</td><td>{{ d.unidad or '' }}</td>
+        <td class="der">{{ d.cantidad_anterior | qty }}</td>
+        <td class="der">{{ d.cantidad_actual | qty }}</td>
+        <td class="der">{{ d.cantidad_total | qty }}</td>
+        <td class="der">{{ d.pu | money }}</td>
+        <td class="der">{{ d.importe | money }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr><td colspan="7">Subtotal</td><td class="der">{{ estimacion.subtotal | money }}</td></tr>
+    <tr><td colspan="7">IVA ({{ proyecto.pct_iva | num }} %)</td><td class="der">{{ estimacion.iva | money }}</td></tr>
+    <tr><td colspan="7">Amortización de anticipo</td><td class="der">-{{ estimacion.amortizacion | money }}</td></tr>
+    <tr><td colspan="7">Retención ({{ proyecto.retencion_pct | num }} %)</td><td class="der">-{{ estimacion.retencion | money }}</td></tr>
+    <tr class="impreso__total"><td colspan="7"><b>Total de la estimación</b></td>
+      <td class="der"><b>{{ estimacion.total | money }}</b></td></tr>
+  </tfoot>
+</table>
+
+<div class="impreso__firmas">
+  <div>Elaboró<div class="linea"></div></div>
+  <div>Revisó<div class="linea"></div></div>
+  <div>Autorizó<div class="linea"></div></div>
+</div>
+{% endblock %}
