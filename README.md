@@ -3,17 +3,15 @@
 Herramienta web para **presupuestos de obra (M1)** y **control de obra (M2)**,
 hecha con **Python + Flask + SQLite + HTML/CSS**, sin dependencias de *frontend*.
 
-Reproduce, con software libre, el flujo de trabajo del sistema OPUS de Ecosoft:
+Reproduce, con software libre, el flujo de trabajo del sistema de:
 catálogo de insumos → costos básicos y horarios → matrices de precios unitarios →
 presupuesto → explosión de insumos → programa de obra → estimaciones, bodega y
 valor ganado.
 
-> Proyecto independiente, sin relación con Ecosoft. No incluye ni redistribuye
-> binarios, catálogos ni bases de datos del producto original.
-
+> Proyecto independiente.
 ---
 
-## Módulos (mismos que plantea OPUS)
+## Módulos
 
 ### M1 · Propuestas y presupuestos
 
