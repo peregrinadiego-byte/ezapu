@@ -101,17 +101,6 @@ docker build -t ezapu .
 docker run --rm -p 5000:5000 -v ezapu-datos:/datos ezapu
 ```
 
-### ⚠️ GitHub Pages no sirve para ejecutar esta aplicación
-
-GitHub Pages es un **host de archivos estáticos**: publica HTML, CSS y JS, pero
-**no ejecuta Python**, así que nunca va a correr Flask. Si activas Pages sobre la
-raíz del repositorio verás un **404 «File not found»**, porque además no hay
-ningún `index.html` ahí.
-
-La carpeta `docs/` incluye sólo una **página de presentación** del proyecto
-(pensada para publicarse con Pages desde la carpeta `/docs`). La aplicación como
-tal necesita un servidor de aplicaciones.
-
 ### Publicar la aplicación en internet
 
 El repositorio ya trae la configuración lista para los servicios que sí ejecutan Python:
@@ -127,91 +116,6 @@ El repositorio ya trae la configuración lista para los servicios que sí ejecut
 `wsgi.py` **crea y siembra la base automáticamente** si no existe, de modo que el
 primer arranque en un servidor nuevo funcione sin pasos manuales.
 
-### Publicar el repositorio en GitHub
-
-El repositorio viene inicializado con un commit en la rama `main`. Si el
-repositorio remoto está vacío:
-
-```bash
-./subir-a-github.sh https://github.com/<tu-usuario>/ezapu.git
-```
-
-El script comprueba tu identidad de Git (te la pide si falta y reatribuye el
-commit inicial a tu nombre), registra el remoto `origin`, asegura la rama `main`
-y ejecuta `git push -u origin main`. Equivale a hacerlo a mano así:
-
-```bash
-git config user.name  "Tu Nombre"
-git config user.email "tu@correo"
-git commit --amend --reset-author --no-edit      # el commit nace a tu nombre
-git remote add origin https://github.com/<tu-usuario>/ezapu.git
-git branch -M main
-git push -u origin main
-```
-
-**Si el repositorio remoto ya tiene contenido distinto** (por ejemplo, una carga
-parcial de archivos), las historias no emparentan y el `push` se rechaza. Dos
-salidas:
-
-```bash
-# opción A · reemplazar el contenido remoto por el proyecto completo
-git fetch origin
-git push --force origin main
-
-# opción B · conservar la historia remota y traerla antes de subir
-git fetch origin
-git merge --allow-unrelated-histories origin/main
-git push origin main
-```
-
-La opción A descarta lo que haya en GitHub (recuperable un tiempo desde la
-actividad del repositorio). La opción B conserva todo, pero arrastra los archivos
-sueltos que ya estaban allá. Lo más limpio en un repositorio recién creado es
-borrarlo, crearlo de nuevo y subir el proyecto completo.
-
-**Autenticación:** por HTTPS, GitHub no acepta la contraseña de la cuenta: usa un
-*token de acceso personal* (GitHub → *Settings* → *Developer settings* →
-*Personal access tokens*) como contraseña cuando `git push` te la pida. Si
-prefieres SSH, usa `git@github.com:<tu-usuario>/ezapu.git` como remoto y sube tu
-llave pública a GitHub.
-
----
-
-## Estructura del repositorio
-
-```
-ezapu/
-├── run.py                     # punto de entrada + comandos de CLI
-├── wsgi.py                    # entrada WSGI (gunicorn, Render, Railway…)
-├── requirements.txt           # Flask + gunicorn
-├── Procfile · render.yaml     # despliegue en Railway / Render
-├── Dockerfile · .env.example
-├── subir-a-github.sh          # asistente para el primer push
-├── docs/index.html            # página de presentación (GitHub Pages)
-├── ezapu/
-│   ├── __init__.py            # fábrica de la aplicación, filtros Jinja
-│   ├── config.py              # configuración
-│   ├── db.py                  # acceso a SQLite (sin ORM)
-│   ├── schema.sql             # 25 tablas del modelo
-│   ├── seed.py                # obra de ejemplo completa
-│   ├── ui.py                  # motor declarativo de vistas (catálogos CRUD + menús)
-│   ├── domain/                # núcleo de cálculo, independiente de Flask
-│   │   ├── costos.py          # salario real, costo horario, matrices y PU
-│   │   ├── explosion.py       # explosión de insumos y programa de suministros
-│   │   ├── presupuesto.py     # hoja, análisis del precio, generadores
-│   │   ├── avance.py          # estimaciones, pagos, consumos, requisiciones
-│   │   ├── bodega.py          # existencias, kardex, costo promedio
-│   │   ├── planeacion.py      # EDT, Gantt, avance ponderado
-│   │   ├── valor_ganado.py    # EVM, curva S, estructuras
-│   │   ├── trees.py / util.py
-│   ├── blueprints/            # main, catalogos, matrices, presupuesto,
-│   │                          # planeacion, control, administracion, reportes
-│   ├── templates/             # Jinja2 (incluye formatos imprimibles)
-│   └── static/css|js          # hoja de estilo única y mejoras de interfaz
-└── tests/test_dominio.py      # pruebas del dominio
-```
-
----
 
 ## Modelo de datos
 
