@@ -32,6 +32,11 @@
     <a href="{{ url_for('main.inicio') }}" class="enlace-simple">Inicio</a>
     <a href="{{ url_for('reportes.indice') }}" class="enlace-simple">Reportes</a>
     <a href="{{ url_for('main.acerca') }}" class="enlace-simple">Acerca de</a>
+    <a href="{{ url_for('main.tutorial') }}" class="enlace-simple">Tutorial</a>
+    {% if session.get('user_name') %}
+      <span class="enlace-simple">{{ session['user_name'] }}</span>
+      <a href="{{ url_for('auth.logout') }}" class="enlace-simple">Salir</a>
+    {% endif %}
   </div>
 </header>
 

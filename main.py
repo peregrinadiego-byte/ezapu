@@ -64,3 +64,8 @@ def acerca():
         ],
     }
     return render_template("acerca.html", versiones=versiones)
+
+
+@bp.route("/tutorial")
+def tutorial():
+    return render_template("tutorial.html")

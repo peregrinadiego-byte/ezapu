@@ -9,7 +9,7 @@ import os
 import sqlite3
 from pathlib import Path
 
-from flask import current_app, g
+from flask import current_app, g, session
 
 SCHEMA = Path(__file__).with_name("schema.sql")
 
@@ -25,7 +25,7 @@ def _connect(path: str | Path) -> sqlite3.Connection:
 def get_db() -> sqlite3.Connection:
     """Conexión de la petición en curso."""
     if "db" not in g:
-        g.db = _connect(current_app.config["DATABASE"])
+        g.db = _connect(_request_database_path())
     return g.db
 
 
@@ -38,6 +38,18 @@ def close_db(_exc=None) -> None:
 def connect(path: str | Path) -> sqlite3.Connection:
     """Conexión independiente (fuera de una petición: CLI, tests, seed)."""
     return _connect(path)
+
+
+def _request_database_path() -> str:
+    """Use a private SQLite file after authentication, otherwise the template DB."""
+    user_id = session.get("user_id")
+    if not user_id:
+        return current_app.config["DATABASE"]
+    path = Path(current_app.config["USER_DATA_DIR"]) / f"usuario_{int(user_id)}.db"
+    if not path.exists():
+        from .auth import create_user_database
+        create_user_database(path, current_app.config["DATABASE"])
+    return str(path)
 
 
 # ---------------------------------------------------------------- helpers ---
