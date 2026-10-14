@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titulo %}Tutorial{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <h1>Primeros pasos en EZAPU</h1>
+  <p class="ayuda">Tu información es privada. Puedes explorar los datos de ejemplo y modificarlos sin afectar a otros usuarios.</p>
+</div>
+<div class="tarjeta">
+  <h2>1. Revisa el tablero</h2>
+  <p>En Inicio encontrarás los proyectos, presupuesto, avance, estimaciones y valor de bodega.</p>
+  <h2>2. Configura los catálogos</h2>
+  <p>En Catálogos registra unidades, recursos, proveedores, mano de obra y equipo. Los costos de los recursos alimentan los cálculos posteriores.</p>
+  <h2>3. Crea o adapta una matriz</h2>
+  <p>Una matriz representa un precio unitario. Agrega materiales, mano de obra, equipo o matrices auxiliares y guarda los cambios.</p>
+  <h2>4. Forma el presupuesto</h2>
+  <p>En Proyectos y presupuestos organiza partidas y conceptos. Captura cantidades, asigna matrices y consulta el análisis del precio.</p>
+  <h2>5. Planea y controla la obra</h2>
+  <p>En Planeación registra tareas y avances. En Control captura estimaciones, pagos, consumos, requisiciones y movimientos de bodega.</p>
+  <h2>6. Genera reportes</h2>
+  <p>Desde Reportes puedes imprimir o guardar en PDF los resultados y exportar información a CSV.</p>
+  <h2>Orden recomendado</h2>
+  <p><strong>Recursos → matrices → proyecto → conceptos → presupuesto → planeación → estimaciones → reportes.</strong></p>
+</div>
+{% endblock %}

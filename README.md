@@ -1,242 +1,183 @@
 # EZAPU
 
-Herramienta web para **presupuestos de obra (M1)** y **control de obra (M2)**,
-hecha con **Python + Flask + SQLite + HTML/CSS**, sin dependencias de *frontend*.
+Aplicación web para elaborar presupuestos y llevar el control de obras. Usa
+Python, Flask y SQLite. No requiere Node.js ni una base de datos externa.
 
-Reproduce, con software libre, el flujo de trabajo del sistema de:
-catálogo de insumos → costos básicos y horarios → matrices de precios unitarios →
-presupuesto → explosión de insumos → programa de obra → estimaciones, bodega y
-valor ganado.
+Proyecto independiente, sin relación con Ecosoft ni con OPUS.
 
-> Proyecto independiente.
----
+## Elige cómo usarlo
 
-## Módulos
+- **En tu computadora:** instala Python y abre EZAPU en
+  `http://127.0.0.1:5000`.
+- **En internet:** publica el repositorio en Render y obtén una dirección
+  pública para abrirlo desde cualquier navegador.
+- **Con Docker:** ejecuta la aplicación en un contenedor local o en un servidor.
 
-### M1 · Propuestas y presupuestos
+## Ejecutarlo en tu computadora
 
-| Grupo | Vistas |
-|---|---|
-| Catálogos de insumos | Todos los insumos, Materiales, Mano de obra, Equipo, Herramienta, Auxiliares, Subcontratos, Fletes, Familias, Grupos, Unidades |
-| Costos básicos | Salarios de mano de obra, Costos horarios de equipo, Matrices de costo unitario |
-| Presupuesto | Proyectos y propuestas, Partidas, Catálogo de conceptos, Volúmenes y generadores, Explosión de insumos, Programa de suministros, Análisis del precio, Escalatorias |
-| Reportes | Formatos imprimibles y exportación a Excel/CSV |
+### Requisitos
 
-### M2 · Control de obra
+- Python 3.10 o posterior; se recomienda Python 3.12.
+- Git, o descargar el repositorio como ZIP.
 
-| Grupo | Vistas |
-|---|---|
-| Planeación | Estructura de trabajos (Gantt), Listado de trabajos, Explosión de insumos, Programa de suministros, Contratos, Planeación de equipo |
-| Catálogos | Recursos, Materiales, Mano de obra, Equipo, Matrices, Fletes, Subcontratos, Contratistas y proveedores, Equipo en obra |
-| Avance | Órdenes de trabajo, Estimaciones, Registro de consumo, Estado de servicios, Pagos, Conceptos a estimar, Requisiciones |
-| Bodega | Estado, Movimientos, Almacenes |
-| Administración de proyectos | Estructura de costos, Estructura de organización, Valor ganado y curva S |
-
----
-
-## Puesta en marcha
-
-Requisitos: **Python 3.10 o superior** (probado en 3.12). No se necesita Node ni base de datos externa.
-
-```bash
-git clone https://github.com/<tu-usuario>/ezapu.git
-cd ezapu
-
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-
-pip install -r requirements.txt
-
-flask --app run init-db          # crea ezapu.db y carga la obra de ejemplo
-python run.py                    # http://127.0.0.1:5000
-```
-
-`python run.py` crea la base automáticamente si no existe, así que basta con
-ejecutarlo. Variables de entorno opcionales (ver `.env.example`):
-
-| Variable | Descripción | Default |
-|---|---|---|
-| `EZAPU_DB` | ruta del archivo SQLite | `ezapu.db` en la raíz |
-| `HOST` / `PORT` | dirección y puerto del servidor | `127.0.0.1` / `5000` |
-| `SECRET_KEY` | clave para mensajes de sesión | valor de desarrollo |
-| `FLASK_DEBUG` | `1` recarga en caliente | `1` |
-
-### Comandos útiles
-
-```bash
-flask --app run init-db      # crea la base (no hace nada si ya existe)
-flask --app run reset-db     # borra y recrea con datos de ejemplo
-flask --app run sembrar      # carga la semilla si la base está vacía
-python -m unittest discover -s tests   # 23 pruebas del dominio de cálculo
-```
-
----
-
-## Uso y publicación
-
-### En tu computadora
+### Linux o macOS
 
 ```bash
 git clone https://github.com/peregrinadiego-byte/ezapu.git
 cd ezapu
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-python run.py                    # http://127.0.0.1:5000
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python run.py
 ```
 
-`ezapu.db` se genera en tu máquina y **no se sube al repositorio** (está en
-`.gitignore`).
+Abre <http://127.0.0.1:5000>.
 
-### GitHub Codespaces
+### Windows PowerShell
 
-Abre el repositorio → *Code* → *Codespaces* → *Create*. La terminal ya incluye
-Python: ejecuta `pip install -r requirements.txt && python run.py` y abre el
-puerto 5000 cuando Codespaces te lo ofrezca.
+```powershell
+git clone https://github.com/peregrinadiego-byte/ezapu.git
+cd ezapu
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python run.py
+```
 
-### Docker (local o servidor)
+Abre <http://127.0.0.1:5000>.
+
+Si PowerShell no permite activar el entorno, ejecuta directamente:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe run.py
+```
+
+La primera ejecución crea `ezapu.db` y carga una obra de ejemplo. Para detener
+el servidor presiona `Ctrl+C` en la terminal.
+
+## Ejecutarlo con Docker
+
+Requiere Docker instalado:
 
 ```bash
+git clone https://github.com/peregrinadiego-byte/ezapu.git
+cd ezapu
 docker build -t ezapu .
 docker run --rm -p 5000:5000 -v ezapu-datos:/datos ezapu
 ```
 
-### Publicar la aplicación en internet
+Abre <http://127.0.0.1:5000>. El volumen `ezapu-datos` conserva la base aunque
+se detenga o se elimine el contenedor.
 
-El repositorio ya trae la configuración lista para los servicios que sí ejecutan Python:
+## Publicarlo en internet con Render
 
-| Servicio | Archivo | Notas |
-|---|---|---|
-| **Render** | `render.yaml` | *New +* → *Blueprint* → conecta el repositorio. Plan gratuito; su disco es efímero, así que la base se recrea en cada despliegue (para conservar los datos, agrega un disco y descomenta el bloque del `render.yaml`). |
-| **Railway** | `Procfile` | Detecta `web: gunicorn wsgi:app …` sin configuración extra. |
-| **Fly.io** | `Dockerfile` | `fly launch` y sigue el asistente. |
-| **PythonAnywhere** | `wsgi.py` | Crea una *Web app* WSGI apuntando a `wsgi.py`. |
-| **VPS propio** | `wsgi.py` | `gunicorn wsgi:app --bind 0.0.0.0:8000` detrás de Nginx. |
+El repositorio ya incluye `render.yaml`, que configura la instalación y el
+arranque de la aplicación.
 
-`wsgi.py` **crea y siembra la base automáticamente** si no existe, de modo que el
-primer arranque en un servidor nuevo funcione sin pasos manuales.
+1. Crea una cuenta en <https://render.com>.
+2. Selecciona **New + → Blueprint**.
+3. Conecta GitHub y elige `peregrinadiego-byte/ezapu`.
+4. Confirma el servicio definido por `render.yaml`.
+5. Espera a que termine el despliegue.
+6. Abre la dirección `.onrender.com` que Render muestre para el servicio.
 
+No necesitas ejecutar comandos en Render: se instalan las dependencias, se crea
+la base si no existe y se inicia EZAPU automáticamente.
 
-## Modelo de datos
+### Persistencia de datos en Render
 
-Un solo archivo SQLite con 25 tablas. Grupos principales:
+Con el plan gratuito, el almacenamiento es efímero. La aplicación funciona,
+pero los datos pueden reiniciarse después de un despliegue o reinicio. Para
+datos reales, configura un disco persistente y conserva respaldos de `ezapu.db`.
 
-* **Catálogos**: `unidad`, `familia`, `grupo`, `tercero`, `recurso`, `mano_obra`, `costo_horario`
-* **Costos**: `matriz`, `matriz_detalle` (componentes: insumo o submatriz)
-* **Presupuesto**: `proyecto`, `partida`, `concepto`, `generador`, `escalatoria`
-* **Planeación y avance**: `tarea`, `contrato`, `contrato_concepto`, `orden_trabajo`,
-  `estimacion`, `estimacion_detalle`, `pago`, `consumo`, `requisicion`, `requisicion_detalle`
-* **Bodega**: `almacen`, `movimiento_bodega`
-* **Administración**: `centro_costo`, `organizacion`, `equipo_en_obra`, `empresa`
+## Qué incluye EZAPU
 
-Los precios **no se capturan dos veces**: el costo vigente de un insumo, el precio
-unitario de una matriz y el importe de un concepto se calculan y se recalculan al
-guardar cualquier cambio (`recalcular_todo`).
+- Catálogos de materiales, mano de obra, equipo, proveedores y unidades.
+- Costos básicos, costos horarios y matrices de precios unitarios.
+- Proyectos, partidas, conceptos, generadores y presupuestos.
+- Explosión de insumos y programa de suministros.
+- Planeación, avance, contratos, estimaciones y pagos.
+- Almacenes, movimientos y kardex.
+- Valor ganado, reportes imprimibles y exportaciones CSV.
 
----
+La aplicación inicia con datos demostrativos: proyecto, recursos, matrices,
+conceptos, tareas, estimaciones y movimientos de bodega.
 
-## Fórmulas implementadas
+## Comandos administrativos
 
-**Costo básico de mano de obra**
-
-```
-salario real = salario base × (1 + factor de prestaciones)
-```
-
-**Costo horario de equipo y herramienta**
-
-```
-depreciación  = (VM − VR) / vida útil
-inversión     = ((VM + VR) / 2) × tasa de interés / horas por año
-seguros       = ((VM + VR) / 2) × tasa de seguro / horas por año
-mantenimiento = coeficiente de mantenimiento × VM / vida útil
-reparaciones  = coeficiente de reparaciones × VM / vida útil
-combustible   = consumo (l/h) × precio del combustible
-lubricantes   = combustible × % de lubricantes
-llantas       = costo de llantas / vida de las llantas
-operador      = salario real del operador / horas del turno
-costo horario = suma de todos los conceptos
-```
-
-**Matriz de precio unitario**
-
-```
-costo directo = Σ (rendimiento × costo del componente)
-precio        = costo directo × (1 + indirectos propios)
-```
-Un componente puede ser un insumo o **otra matriz** (auxiliar), con detección de
-referencias circulares.
-
-**Análisis del precio del presupuesto**
-
-```
-indirectos, utilidad, financiamiento y cargos adicionales
-  → sobre el costo directo (por omisión) o en cascada sobre el acumulado
-subtotal = directo + indirectos + utilidad + financiamiento + cargos
-total    = subtotal × (1 + IVA)
-```
-
-**Explosión de insumos**: abre recursivamente cada matriz del presupuesto y acumula
-solo los insumos básicos (materiales, mano de obra, equipo, herramienta,
-subcontratos y fletes) multiplicados por el volumen del concepto.
-
-**Estimaciones**
-
-```
-importe          = cantidad de esta estimación × precio unitario
-subtotal         = Σ importes
-total            = subtotal + IVA − amortización de anticipo − retención
-cantidad total   = cantidad anterior acumulada + cantidad de esta estimación
-```
-
-**Valor ganado**: PV, EV, AC, SV, CV, SPI, CPI, EAC, ETC, VAC y curva S, tomando el
-importe de cada tarea como reparto del importe de su partida según su peso.
-
----
-
-## Reportes
-
-Todos los formatos se generan como HTML imprimible (botón *Imprimir / Guardar PDF*
-del navegador, con hoja de estilo `@media print`) y además pueden exportarse a
-CSV/Excel (llevan BOM UTF-8 para que Excel respete los acentos):
-
-* Presupuesto de obra, catálogo de conceptos, explosión de insumos
-* Análisis de precio unitario por matriz
-* Estimación de obra con firmas, estado de cuenta
-* Catálogo de insumos, inventario de bodega, reporte de valor ganado
-
----
-
-## Pruebas
-
-`tests/test_dominio.py` cubre el núcleo de cálculo con 23 casos: salario real,
-partes del costo horario, merma de materiales, matrices anidadas, detección de
-ciclos, sumatoria del presupuesto, indirectos sobre directo y sobre acumulado,
-explosión de insumos, acumulados de estimaciones, existencias y costo promedio de
-bodega, y los indicadores de valor ganado.
+Con el entorno virtual activado:
 
 ```bash
-python -m unittest discover -s tests -v
+flask --app run init-db   # crea la base si no existe
+flask --app run sembrar   # carga datos si la base está vacía
+flask --app run reset-db  # reemplaza la base con datos de ejemplo
 ```
 
----
+`reset-db` reemplaza los datos actuales. Úsalo solo para reiniciar la
+información.
 
-## Alcance y siguientes pasos
+## Configuración opcional
 
-Implementado: catálogos, costos básicos y horarios, matrices anidadas, presupuesto,
-generadores, análisis del precio, explosión, programa de suministros, EDT con Gantt,
-contratos, estimaciones con amortización y retención, pagos, consumos, requisiciones,
-bodega con kardex y costo promedio, estructuras de costo y organización, valor ganado.
+| Variable | Función | Predeterminado |
+|---|---|---|
+| `EZAPU_DB` | Ruta del archivo SQLite | `ezapu.db` |
+| `HOST` | Dirección de escucha | `127.0.0.1` |
+| `PORT` | Puerto | `5000` |
+| `SECRET_KEY` | Clave de sesión | clave de desarrollo |
+| `FLASK_DEBUG` | Recarga automática | `1` |
 
-Ideas para extender:
+Para acceder desde otros dispositivos de tu red local:
 
-* Usuarios y permisos, bitácora de cambios por obra.
-* Importación/exportación de OPUS, Neodata y hojas de cálculo.
-* Catálogos generales compartidos entre proyectos (catálogo universal).
-* Programación con dependencias y ruta crítica (CPM) más allá del Gantt simple.
-* Costos paramétricos de indirectos por personal y oficina central.
-* Escalatorias aplicadas al importe de cada estimación.
+```bash
+HOST=0.0.0.0 python run.py
+```
+
+No expongas esta modalidad directamente a internet sin configurar seguridad y
+un servidor de producción.
+
+Si el puerto 5000 está ocupado:
+
+```bash
+PORT=5050 python run.py
+```
+
+En Windows PowerShell:
+
+```powershell
+$env:PORT=5050
+python run.py
+```
+
+## Solución de problemas
+
+**`python` no existe:** en Linux/macOS usa `python3`; en Windows usa `py`.
+
+**Render falla:** revisa los registros. Debe instalar `requirements.txt` y
+arrancar con `gunicorn wsgi:app`.
+
+**Quiero comenzar de cero:** ejecuta `flask --app run reset-db`. Esto reemplaza
+los datos actuales.
+
+## Estructura principal
+
+```text
+run.py                 entrada para desarrollo local
+wsgi.py                entrada para Render y Gunicorn
+requirements.txt       dependencias de Python
+Dockerfile             imagen Docker
+render.yaml            configuración de Render
+ezapu/
+  __init__.py          creación de la aplicación Flask
+  db.py                conexión e inicialización de SQLite
+  schema.sql           estructura de la base
+  seed.py              datos de ejemplo
+  domain/              cálculos de costos y control
+  blueprints/          rutas de la aplicación
+  templates/           páginas HTML
+  static/              estilos y JavaScript
+```
 
 ## Licencia
 
-MIT. Ver `LICENSE`.
+MIT. Consulta [LICENSE](LICENSE).
